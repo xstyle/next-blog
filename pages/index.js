@@ -3,6 +3,22 @@ import Head from 'next/head'
 let LEFT_PIN = 'D4'
 let RIGHT_PIN = 'D16'
 
+let LEFT_BACK_PIN = 'D4'
+let RIGHT_BACK_PIN = 'D14'
+
+let ARMOR_PIN = 'D12'
+let ARMOR_CLOCKWISE_PIN = 'D13'
+let ACCELERATE_PIN = 'D0'
+
+
+let LEFT_FORWARD_KEY_CODE = "KeyW"
+let RIGHT_FORWARD_KEY_CODE = "KeyP"
+
+let LEFT_BACK_KEY_CODE = "KeyS"
+let RIGHT_BACK_KEY_CODE = "KeyL"
+let ACCELERATE_KEY_CODE = "Space"
+
+
 class MyForm extends React.Component {
   constructor(props) {
     super(props);
@@ -55,31 +71,18 @@ class MyForm extends React.Component {
   }
 }
 
-function Controller(props) {
-  return (<div className="controller">
-    <div>
-      Left: {props.left ? "go" : "stop"}
-    </div>
-    <div>
-      Right: {props.right ? "go" : "stop"}
-    </div>
-  <style jsx>{`
-    .controller {
-      padding-bottom: 1rem;
-    }
-  `}</style>
-  </div>)
-}
-
 export default class Home extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      token: 'qqqqqqqqqq',
+      token: 'P5twwoaB7pUclRJzUtiX2rzGfpUaZBO',
       on: false,
       left: false,
       right: false,
-      logs: []
+      left_back: false,
+      right_back: false,
+      logs: [],
+      keylogs: []
     }
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
@@ -91,25 +94,43 @@ export default class Home extends React.Component {
     window.addEventListener('keyup', this.onKeyUp)
   }
   onKeyDown(event) {
-    if (event.repeat) {
-      return true;
-    }
-    if (!this.state.on) return;
-    switch (event.code) {
-      case "ArrowLeft":
-        this.setState({ left: true }, () => {
-          this.callApiBlink(LEFT_PIN, true)
-        });
+    if (event.repeat) return
+    if (!this.state.on) return
 
-        break;
-      case "ArrowRight":
-        this.setState({ right: true }, () => {
-          this.callApiBlink(RIGHT_PIN, true)
-        });
-        break;
+    switch (event.code) {
+      case LEFT_FORWARD_KEY_CODE:
+        this.setState({ left: true })
+        this.callApiBlink(LEFT_PIN, true)
+        break
+      case RIGHT_FORWARD_KEY_CODE:
+        this.setState({ right: true })
+        this.callApiBlink(RIGHT_PIN, true)
+        break
+      case LEFT_BACK_KEY_CODE:
+        this.setState({ left_back: true })
+        this.callApiBlink(LEFT_BACK_PIN, true)
+        break
+      case RIGHT_BACK_KEY_CODE:
+        this.setState({ right_back: true })
+        this.callApiBlink(RIGHT_BACK_PIN, true)
+        break
+      case ACCELERATE_KEY_CODE:
+        this.setState({ accelerate: true })
+        this.callApiBlink(ACCELERATE_PIN, true)
+        break
       default:
-        break;
+        break
     }
+    this.setState({
+      keylogs: [
+        ...this.state.keylogs,
+        {
+          time: new Date(),
+          code: event.code,
+          key: Date.now()
+        }
+      ].slice(-5)
+    })
   }
   handleTokenChange(token) {
     this.setState({ token })
@@ -120,16 +141,26 @@ export default class Home extends React.Component {
   onKeyUp(event) {
     if (!this.state.on) return;
     switch (event.code) {
-      case "ArrowLeft":
-        this.setState({ left: false }, () => {
-          this.callApiBlink(LEFT_PIN, false)
-        })
+      case LEFT_FORWARD_KEY_CODE:
+        this.setState({ left: false })
+        this.callApiBlink(LEFT_PIN, false)
         break;
-      case "ArrowRight":
-        this.setState({ right: false }, () => {
-          this.callApiBlink(RIGHT_PIN, false)
-        })
+      case RIGHT_FORWARD_KEY_CODE:
+        this.setState({ right: false })
+        this.callApiBlink(RIGHT_PIN, false)
         break;
+      case LEFT_BACK_KEY_CODE:
+        this.setState({ left_back: false })
+        this.callApiBlink(LEFT_BACK_PIN, false)
+        break
+      case RIGHT_BACK_KEY_CODE:
+        this.setState({ right_back: false })
+        this.callApiBlink(RIGHT_BACK_PIN, false)
+        break
+      case ACCELERATE_KEY_CODE:
+        this.setState({ accelerate: false })
+        this.callApiBlink(ACCELERATE_PIN, false)
+        break
       default:
         break;
     }
@@ -167,15 +198,14 @@ export default class Home extends React.Component {
         </Head>
         <div>
           <MyForm onChange={this.handleTokenChange} handleChangeOn={this.handleChangeOn} on={this.state.on} token={this.state.token} />
-          {this.state.on && <Controller {...this.state} />}
-          {this.state.logs.length > 0 && <table>
+          {this.state.logs.length > 0 && <table className="log">
             <thead>
               <tr>
                 <th>
-                  Время
+                  Time
                 </th>
                 <th>
-                  HTTP CODE
+                  HTTP code
                 </th>
                 <th>
                   Команда
@@ -200,10 +230,27 @@ export default class Home extends React.Component {
                   <td>
                     {log.ping} мс
                   </td>
-              </tr>
+                </tr>
               })
             }
           </table>}
+          {this.state.keylogs.length > 0 && <table className="log">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Key code</th>
+              </tr>
+            </thead>
+            {
+              this.state.keylogs.map(log =>
+                <tr key={log.key}>
+                  <td>{log.time.toString()}</td>
+                  <td>{log.code}</td>
+                </tr>
+              )
+            }
+          </table>}
+
           <h3>Инструкция</h3>
           <ol>
             <li>Вставить Access Token от Blynk. Нажать <b>Ключ на старт!</b></li>
@@ -212,6 +259,39 @@ export default class Home extends React.Component {
             <li>В логах видно время запроса, код ответа сервера, команда и время выполнения запроса.</li>
           </ol>
           <p><sup>*</sup> Токены и активность никак не сохраняется. Для сброса достаточно обновить страницу в браузере.</p>
+          <h3>Настройки</h3>
+          <table>
+            <thead>
+              <th>Команда</th>
+              <th>Key code</th>
+              <th>Pin</th>
+            </thead>
+            <tr className={this.state.left ? "active" : ""}>
+              <td>Влево вперед</td>
+              <td>{LEFT_FORWARD_KEY_CODE}</td>
+              <td>{LEFT_PIN}</td>
+            </tr>
+            <tr className={this.state.right ? "active" : ""}>
+              <td>Вправо вперед</td>
+              <td>{RIGHT_FORWARD_KEY_CODE}</td>
+              <td>{RIGHT_PIN}</td>
+            </tr>
+            <tr className={this.state.left_back ? "active" : ""}>
+              <td>Влево назад</td>
+              <td>{LEFT_BACK_KEY_CODE}</td>
+              <td>{LEFT_BACK_PIN}</td>
+            </tr>
+            <tr className={this.state.right_back ? "active" : ""}>
+              <td>Вправо назад</td>
+              <td>{RIGHT_BACK_KEY_CODE}</td>
+              <td>{RIGHT_PIN}</td>
+            </tr>
+            <tr className={this.state.accelerate ? "active" : ""}>
+              <td>Ускорение</td>
+              <td>{ACCELERATE_KEY_CODE}</td>
+              <td>{ACCELERATE_PIN}</td>
+            </tr>
+          </table>
         </div>
 
         <style jsx>{`
@@ -224,11 +304,15 @@ export default class Home extends React.Component {
             align-items: center;
           }
 
-          table {
+          table.log {
             font-size: 8px;
-            color: gray
+            color: gray;
           }
 
+          table tr.active {
+            color: red;
+            font-weight: bold;
+          }
           main {
             padding: 5rem 0;
             flex: 1;
