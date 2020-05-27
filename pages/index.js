@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 let LEFT_PIN = 'D16'
-let RIGHT_PIN = 'D5'
+let RIGHT_PIN = 'D4'
 
 class MyForm extends React.Component {
   constructor(props) {
