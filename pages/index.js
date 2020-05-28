@@ -3,8 +3,8 @@ import Head from 'next/head'
 let LEFT_PIN = 'D4'
 let RIGHT_PIN = 'D16'
 
-let LEFT_BACK_PIN = 'D4'
-let RIGHT_BACK_PIN = 'D14'
+let LEFT_BACK_PIN = 'D14'
+let RIGHT_BACK_PIN = 'D6'
 
 let ARMOR_PIN = 'D12'
 let ARMOR_CLOCKWISE_PIN = 'D13'
@@ -284,7 +284,7 @@ export default class Home extends React.Component {
             <tr className={this.state.right_back ? "active" : ""}>
               <td>Вправо назад</td>
               <td>{RIGHT_BACK_KEY_CODE}</td>
-              <td>{RIGHT_PIN}</td>
+              <td>{RIGHT_BACK_PIN}</td>
             </tr>
             <tr className={this.state.accelerate ? "active" : ""}>
               <td>Ускорение</td>
