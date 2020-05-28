@@ -8,7 +8,7 @@ let LEFT_BACK_PIN = 'D14'
 let RIGHT_BACK_PIN = 'D5'
 
 let ARMOR_PIN = 'D12'
-let ARMOR_CLOCKWISE_PIN = 'D13'
+let ARMOR_2_PIN = 'D13'
 let ACCELERATE_PIN = 'D0'
 
 
@@ -18,7 +18,8 @@ let RIGHT_FORWARD_KEY_CODE = "KeyP"
 let LEFT_BACK_KEY_CODE = "KeyS"
 let RIGHT_BACK_KEY_CODE = "KeyL"
 let ACCELERATE_KEY_CODE = "Space"
-
+let ARMOR_KEY_CODE = "Enter"
+let ARMOR_2_KEY_CODE = "ShiftLeft"
 
 class MyForm extends React.Component {
   constructor(props) {
@@ -78,7 +79,7 @@ class Home extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      token:  props.router.query.token,
+      token: props.router.query.token,
       on: false,
       left: false,
       right: false,
@@ -92,8 +93,8 @@ class Home extends React.Component {
     this.handleTokenChange = this.handleTokenChange.bind(this);
     this.handleChangeOn = this.handleChangeOn.bind(this);
   }
-  static getInitialProps({query}) {
-    return {query}
+  static getInitialProps({ query }) {
+    return { query }
   }
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown)
@@ -124,6 +125,15 @@ class Home extends React.Component {
         this.setState({ accelerate: true })
         this.callApiBlink(ACCELERATE_PIN, true)
         break
+      case ARMOR_KEY_CODE:
+        this.setState({ armor: true })
+        this.callApiBlink(ARMOR_PIN, true)
+        break
+      case ARMOR_2_KEY_CODE:
+        this.setState({ armor_2: true })
+        this.callApiBlink(ARMOR_2_PIN, true)
+        break
+
       default:
         break
     }
@@ -166,6 +176,14 @@ class Home extends React.Component {
       case ACCELERATE_KEY_CODE:
         this.setState({ accelerate: false })
         this.callApiBlink(ACCELERATE_PIN, false)
+        break
+      case ARMOR_KEY_CODE:
+        this.setState({ armor: false })
+        this.callApiBlink(ARMOR_PIN, false)
+        break
+      case ARMOR_2_KEY_CODE:
+        this.setState({ armor_2: false })
+        this.callApiBlink(ARMOR_2_PIN, false)
         break
       default:
         break;
@@ -296,6 +314,16 @@ class Home extends React.Component {
               <td>Ускорение</td>
               <td>{ACCELERATE_KEY_CODE}</td>
               <td>{ACCELERATE_PIN}</td>
+            </tr>
+            <tr className={this.state.armor ? "active" : ""}>
+              <td>Доспехи</td>
+              <td>{ARMOR_KEY_CODE}</td>
+              <td>{ARMOR_PIN}</td>
+            </tr>
+            <tr className={this.state.armor_2 ? "active" : ""}>
+              <td>Доспехи 2</td>
+              <td>{ARMOR_2_KEY_CODE}</td>
+              <td>{ARMOR_2_PIN}</td>
             </tr>
           </table>
         </div>
