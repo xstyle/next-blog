@@ -1,10 +1,11 @@
 import Head from 'next/head'
+import { useRouter, withRouter } from 'next/router'
 
 let LEFT_PIN = 'D4'
 let RIGHT_PIN = 'D16'
 
 let LEFT_BACK_PIN = 'D14'
-let RIGHT_BACK_PIN = 'D6'
+let RIGHT_BACK_PIN = 'D5'
 
 let ARMOR_PIN = 'D12'
 let ARMOR_CLOCKWISE_PIN = 'D13'
@@ -71,11 +72,13 @@ class MyForm extends React.Component {
   }
 }
 
-export default class Home extends React.Component {
+
+
+class Home extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      token: 'P5twwoaB7pUclRJzUtiX2rzGfpUaZBO',
+      token:  props.router.query.token,
       on: false,
       left: false,
       right: false,
@@ -88,6 +91,9 @@ export default class Home extends React.Component {
     this.onKeyUp = this.onKeyUp.bind(this);
     this.handleTokenChange = this.handleTokenChange.bind(this);
     this.handleChangeOn = this.handleChangeOn.bind(this);
+  }
+  static getInitialProps({query}) {
+    return {query}
   }
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown)
@@ -453,3 +459,4 @@ export default class Home extends React.Component {
   }
 
 }
+export default withRouter(Home)
