@@ -312,7 +312,7 @@ class Home extends React.Component {
           </table>
         </div>
         <iframe id='fp_embed_player' 
-        src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC,Flash,MSE,WSPlayer' 
+        src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC' 
         marginwidth='0' marginheight='0' frameborder='0' width='100%' height='400px' scrolling='no' allowfullscreen='allowfullscreen'/>
         <style jsx>{`
           .container {
