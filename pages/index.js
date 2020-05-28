@@ -25,23 +25,11 @@ class MyForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: props.token,
-      showOn: false,
+      showOn: true,
     };
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChangeOn = this.handleChangeOn.bind(this);
   }
-  handleChange(event) {
-    this.setState({ token: event.target.value });
-  }
-  handleSubmit(event) {
-    event.stopPropagation();
-    if (!this.state.token) return;
-    this.props.onChange(this.state.token);
-    this.setState({ showOn: true });
-  }
+
   handleChangeOn(event) {
     this.props.handleChangeOn(event.target.checked);
   }
@@ -49,20 +37,9 @@ class MyForm extends React.Component {
     return (
       <form>
         <label>
-          Token<sup>*</sup>:
-          {!this.state.showOn && <input type="text" value={this.state.token} onChange={this.handleChange} />}
-          {this.state.showOn && this.props.token}
-        </label>
-        {!this.state.showOn && <button onClick={this.handleSubmit} type="button">Ключ на старт!</button>}
-
-        <br />
-        {this.state.showOn &&
-          <label>
-            Пуск:
+          Пуск:
         <input type="checkbox" checked={this.props.on} onChange={this.handleChangeOn} />
-          </label>
-        }
-
+        </label>
         <style jsx>{`
         form {
           padding-bottom: 1rem;
@@ -239,24 +216,26 @@ class Home extends React.Component {
                 </th>
               </tr>
             </thead>
-            {
-              this.state.logs.map(log => {
-                return <tr key={log.key}>
-                  <td>
-                    {log.time.toString()}
+            <tbody>
+              {
+                this.state.logs.map(log => {
+                  return <tr key={log.key}>
+                    <td>
+                      {log.time.toString()}
+                    </td>
+                    <td>
+                      {log.status}
+                    </td>
+                    <td>
+                      {log.message}
+                    </td>
+                    <td>
+                      {log.ping} мс
                   </td>
-                  <td>
-                    {log.status}
-                  </td>
-                  <td>
-                    {log.message}
-                  </td>
-                  <td>
-                    {log.ping} мс
-                  </td>
-                </tr>
-              })
-            }
+                  </tr>
+                })
+              }
+            </tbody>
           </table>}
           {this.state.keylogs.length > 0 && <table className="log">
             <thead>
@@ -265,66 +244,71 @@ class Home extends React.Component {
                 <th>Key code</th>
               </tr>
             </thead>
-            {
-              this.state.keylogs.map(log =>
-                <tr key={log.key}>
-                  <td>{log.time.toString()}</td>
-                  <td>{log.code}</td>
-                </tr>
-              )
-            }
+            <tbody>
+              {
+                this.state.keylogs.map(log =>
+                  <tr key={log.key}>
+                    <td>{log.time.toString()}</td>
+                    <td>{log.code}</td>
+                  </tr>
+                )
+              }
+            </tbody>
           </table>}
 
           <h3>Инструкция</h3>
           <ol>
-            <li>Вставить Access Token от Blynk. Нажать <b>Ключ на старт!</b></li>
-            <li>Включить Пуск. В выключенном состоянии команды не отправляются на сервер Blynk.</li>
-            <li>Стрелками Влево (D2) - Вправо (D0) управлять. </li>
+            <li>Включить Пуск.</li>
+            <li>Управлять кнопками <b>W</b> - вперед влево, <b>S</b> - назад влево, <b>P</b> - вперед вправо, <b>L</b> - назад вправо, <b>Пробел</b> - ускорение, <b>Левый Shift</b> - Доспехи, <b>Enter</b> - Доспехи 2.</li>
             <li>В логах видно время запроса, код ответа сервера, команда и время выполнения запроса.</li>
           </ol>
-          <p><sup>*</sup> Токены и активность никак не сохраняется. Для сброса достаточно обновить страницу в браузере.</p>
           <h3>Настройки</h3>
           <table>
             <thead>
-              <th>Команда</th>
-              <th>Key code</th>
-              <th>Pin</th>
+              <tr>
+                <th>Команда</th>
+                <th>Key code</th>
+                <th>Pin</th>
+              </tr>
             </thead>
-            <tr className={this.state.left ? "active" : ""}>
-              <td>Влево вперед</td>
-              <td>{LEFT_FORWARD_KEY_CODE}</td>
-              <td>{LEFT_PIN}</td>
-            </tr>
-            <tr className={this.state.right ? "active" : ""}>
-              <td>Вправо вперед</td>
-              <td>{RIGHT_FORWARD_KEY_CODE}</td>
-              <td>{RIGHT_PIN}</td>
-            </tr>
-            <tr className={this.state.left_back ? "active" : ""}>
-              <td>Влево назад</td>
-              <td>{LEFT_BACK_KEY_CODE}</td>
-              <td>{LEFT_BACK_PIN}</td>
-            </tr>
-            <tr className={this.state.right_back ? "active" : ""}>
-              <td>Вправо назад</td>
-              <td>{RIGHT_BACK_KEY_CODE}</td>
-              <td>{RIGHT_BACK_PIN}</td>
-            </tr>
-            <tr className={this.state.accelerate ? "active" : ""}>
-              <td>Ускорение</td>
-              <td>{ACCELERATE_KEY_CODE}</td>
-              <td>{ACCELERATE_PIN}</td>
-            </tr>
-            <tr className={this.state.armor ? "active" : ""}>
-              <td>Доспехи</td>
-              <td>{ARMOR_KEY_CODE}</td>
-              <td>{ARMOR_PIN}</td>
-            </tr>
-            <tr className={this.state.armor_2 ? "active" : ""}>
-              <td>Доспехи 2</td>
-              <td>{ARMOR_2_KEY_CODE}</td>
-              <td>{ARMOR_2_PIN}</td>
-            </tr>
+            <tbody>
+              <tr className={this.state.left ? "active" : ""}>
+                <td>Влево вперед</td>
+                <td>{LEFT_FORWARD_KEY_CODE}</td>
+                <td>{LEFT_PIN}</td>
+              </tr>
+              <tr className={this.state.right ? "active" : ""}>
+                <td>Вправо вперед</td>
+                <td>{RIGHT_FORWARD_KEY_CODE}</td>
+                <td>{RIGHT_PIN}</td>
+              </tr>
+              <tr className={this.state.left_back ? "active" : ""}>
+                <td>Влево назад</td>
+                <td>{LEFT_BACK_KEY_CODE}</td>
+                <td>{LEFT_BACK_PIN}</td>
+              </tr>
+              <tr className={this.state.right_back ? "active" : ""}>
+                <td>Вправо назад</td>
+                <td>{RIGHT_BACK_KEY_CODE}</td>
+                <td>{RIGHT_BACK_PIN}</td>
+              </tr>
+              <tr className={this.state.accelerate ? "active" : ""}>
+                <td>Ускорение</td>
+                <td>{ACCELERATE_KEY_CODE}</td>
+                <td>{ACCELERATE_PIN}</td>
+              </tr>
+              <tr className={this.state.armor ? "active" : ""}>
+                <td>Доспехи</td>
+                <td>{ARMOR_KEY_CODE}</td>
+                <td>{ARMOR_PIN}</td>
+              </tr>
+              <tr className={this.state.armor_2 ? "active" : ""}>
+                <td>Доспехи 2</td>
+                <td>{ARMOR_2_KEY_CODE}</td>
+                <td>{ARMOR_2_PIN}</td>
+              </tr>
+            </tbody>
+
           </table>
         </div>
 
