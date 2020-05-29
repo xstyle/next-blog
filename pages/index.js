@@ -167,7 +167,7 @@ class Home extends React.Component {
     }
   }
   callApiBlink(pin, value) {
-    let url = `https://blynk-cloud.com/${this.state.token}/update/${pin}?value=${value ? 1 : 0}`
+    let url = `http://178.141.81.193:8080/${this.state.token}/update/${pin}?value=${value ? 1 : 0}`
     let time = Date.now()
 
     fetch(url)
