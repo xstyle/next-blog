@@ -82,10 +82,10 @@ class Home extends React.Component {
   }
   getUserMedia(cb) {
     return new Promise((resolve, reject) => {
-      navigator.getUserMedia = navigator.getUserMedia =
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia;
+      // window.navigator.getUserMedia = navigator.getUserMedia =
+      //   navigator.getUserMedia ||
+      //   navigator.webkitGetUserMedia ||
+      //   navigator.mozGetUserMedia;
       const op = {
         video: {
           width: { min: 160, ideal: 640, max: 1280 },
