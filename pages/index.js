@@ -93,7 +93,7 @@ class Home extends React.Component {
         },
         audio: true
       };
-      window.navigator.getUserMedia(
+      navigator.mediaDevices.getUserMedia(
         op,
         stream => {
           this.setState({ streamUrl: stream, localStream: stream });
