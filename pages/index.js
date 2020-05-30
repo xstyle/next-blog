@@ -77,32 +77,24 @@ class Home extends React.Component {
     window.addEventListener('keydown', this.onKeyDown)
     window.addEventListener('keyup', this.onKeyUp)
     this.getUserMedia().then(() => {
-      debugger
+      console.log('it\'s works!')
     });
   }
-  getUserMedia(cb) {
-    return new Promise((resolve, reject) => {
-      // window.navigator.getUserMedia = navigator.getUserMedia =
-      //   navigator.getUserMedia ||
-      //   navigator.webkitGetUserMedia ||
-      //   navigator.mozGetUserMedia;
-      const op = {
-        video: {
-          width: { min: 160, ideal: 640, max: 1280 },
-          height: { min: 120, ideal: 360, max: 720 }
-        },
-        audio: true
-      };
-      navigator.mediaDevices.getUserMedia(
-        op,
-        stream => {
-          this.setState({ streamUrl: stream, localStream: stream });
-          this.localVideo.srcObject = stream;
-          resolve();
-        },
-        () => {}
-      );
-    });
+  async getUserMedia(cb) {
+    // window.navigator.getUserMedia = navigator.getUserMedia =
+    //   navigator.getUserMedia ||
+    //   navigator.webkitGetUserMedia ||
+    //   navigator.mozGetUserMedia;
+    const op = {
+      video: {
+        width: { min: 160, ideal: 640, max: 1280 },
+        height: { min: 120, ideal: 360, max: 720 }
+      },
+      audio: true
+    };
+    const stream = await navigator.mediaDevices.getUserMedia(op);
+    this.setState({ streamUrl: stream, localStream: stream });
+    this.localVideo.srcObject = stream;
   }
   onKeyDown(event) {
     if (event.repeat) return
@@ -339,11 +331,11 @@ class Home extends React.Component {
           </table>
         </div>
         <video
-            autoPlay
-            id='localVideo'
-            muted
-            ref={video => (this.localVideo = video)}
-          />
+          autoPlay
+          id='localVideo'
+          muted
+          ref={video => (this.localVideo = video)}
+        />
         {/* <iframe id='fp_embed_player' 
         src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC' 
         marginwidth='0' marginheight='0' frameborder='0' width='100%' height='400px' scrolling='no' allowfullscreen='allowfullscreen'/> */}
