@@ -14,20 +14,14 @@ export default class UserVideoComponent extends Component {
                 {this.props.streamManager !== undefined ? (
                     <div className="streamcomponent">
                         <OpenViduVideoComponent streamManager={this.props.streamManager} />
-                        <div><p>{this.getNicknameTag()}</p></div>
+                        <div className="user-name">{this.getNicknameTag()}</div>
                     </div>
                 ) : null}
                 <style jsx>{`
-                video {
-                    width: 100%;
-                    height: auto;
-                    float: left;
-                    cursor: pointer;
-                }
                 .streamcomponent {
                     position: relative;
                 }
-                .streamcomponent div {
+                .streamcomponent .user-name {
                     top: 0;
                     position: absolute;
                     background: #f8f8f8;

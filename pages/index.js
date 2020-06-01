@@ -76,6 +76,7 @@ class Home extends React.Component {
 
     this.OPENVIDU_SERVER_SECRET = props.router.query.OPENVIDU_SERVER_SECRET;
     this.OPENVIDU_SERVER_URL = props.router.query.OPENVIDU_SERVER_URL;
+    this.IP_CAMERA_RTSP_URL = props.router.query.IP_CAMERA_RTSP_URL;
 
     this.createSession = this.createSession.bind(this);
     this.joinSession = this.joinSession.bind(this);
@@ -342,10 +343,10 @@ class Home extends React.Component {
     let subscribers = this.state.subscribers;
     let index = subscribers.indexOf(streamManager, 0);
     if (index > -1) {
-        subscribers.splice(index, 1);
-        this.setState({
-            subscribers: subscribers,
-        });
+      subscribers.splice(index, 1);
+      this.setState({
+        subscribers: subscribers,
+      });
     }
   }
 
@@ -355,6 +356,10 @@ class Home extends React.Component {
         mainStreamManager: stream
       });
     }
+  }
+
+  attachCamera() {
+
   }
 
   render() {
@@ -480,9 +485,9 @@ class Home extends React.Component {
         </div>
 
         {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
-          <h1>Подключиться к конференции</h1>
-          <form className="form-group" onSubmit={this.joinSession}>
-            <div>
+          <h3>Конференция</h3>
+          <form onSubmit={this.joinSession}>
+            <div className="form-group">
               <label>Участник: </label>
               <input
                 className="form-control"
@@ -492,6 +497,7 @@ class Home extends React.Component {
                 onChange={this.handleChangeUserName}
                 required
               />
+              <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
             </div>
             <div className="form-group">
               <button className="btn btn-lg btn-success" name="commit" type="submit" >
@@ -501,40 +507,48 @@ class Home extends React.Component {
           </form>
         </div>}
         {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
-          <div id="session">
-            <div id="session-header">
-              <h1 id="session-title">{this.sessionId}</h1>
-              <button
-                className="btn btn-large btn-danger"
-                type="button"
-                id="buttonLeaveSession"
-                onClick={this.leaveSession}
-              >
-                Отключиться
+          <div id="session" className="row" >
+            <div id="session-header" className="col-12">
+              <h2 id="session-title">Комната: {this.sessionId}</h2>
+              <div className="form-group">
+                <button
+                  className="btn btn-large btn-danger"
+                  type="button"
+                  id="buttonLeaveSession"
+                  onClick={this.leaveSession}
+                >
+                  Отключиться
               </button>
+              </div>
+
             </div>
 
             {this.state.mainStreamManager !== undefined ? (
-              <div id="main-video" className="col-md-6">
+              <div id="main-video" className="col-md-6 col-12">
                 <UserVideoComponent streamManager={this.state.mainStreamManager} />
               </div>
             ) : null}
-            <div id="video-container" className="col-md-6">
-              {this.state.publisher !== undefined ? (
-                <div className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(this.state.publisher)}>
-                  <UserVideoComponent
-                    streamManager={this.state.publisher} />
-                </div>
-              ) : null}
-              {this.state.subscribers.map((sub, i) => (
-                <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
-                  <UserVideoComponent streamManager={sub} />
-                </div>
-              ))}
+            <div id="video-container" className="col-md-6 col-12">
+            <label>Участники: {this.state.subscribers.length + 1}</label>
+              <div className="row">
+                {this.state.publisher !== undefined ? (
+                  <div className="stream-container col-md-6 col-xs-6 col-12"
+                    onClick={() => this.handleMainVideoStream(this.state.publisher)}>
+                    <UserVideoComponent
+                      streamManager={this.state.publisher} />
+                  </div>
+                ) : null}
+                {this.state.subscribers.map((sub, i) => (
+                  <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
+                    <UserVideoComponent streamManager={sub} />
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         }
-        <div className="video-container">
+        <div className="video-container pt-4">
           <iframe id='fp_embed_player'
             src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC'
             marginWidth='0'
@@ -551,15 +565,12 @@ class Home extends React.Component {
           .container {
             min-height: 100vh;
             padding: 0 0.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
           }
 
           #video-container,
           .video-container {
-            width: 640px;
+            max-width: 640px;
+            width: 100%;
           }
 
           table.log {
@@ -574,8 +585,8 @@ class Home extends React.Component {
           main {
             padding: 5rem 0;
             flex: 1;
-            display: flex;
-            flex-direction: column;
+            // display: flex;
+            // flex-direction: column;
             justify-content: center;
             align-items: center;
           }
