@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import { useRouter, withRouter } from 'next/router'
+import UserVideoComponent from '../components/UserVideoComponent'
 
 let LEFT_PIN = 'D4'
 let RIGHT_PIN = 'D16'
@@ -53,6 +54,7 @@ class MyForm extends React.Component {
 
 
 class Home extends React.Component {
+
   constructor(props) {
     super(props)
     this.state = {
@@ -63,39 +65,41 @@ class Home extends React.Component {
       left_back: false,
       right_back: false,
       logs: [],
-      keylogs: []
+      keylogs: [],
+      subscribers: [],
+      myUserName: 'Робот ' + Math.floor(Math.random() * 100),
     }
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
     this.handleTokenChange = this.handleTokenChange.bind(this);
     this.handleChangeOn = this.handleChangeOn.bind(this);
+
+    this.OPENVIDU_SERVER_SECRET = props.router.query.OPENVIDU_SERVER_SECRET;
+    this.OPENVIDU_SERVER_URL = props.router.query.OPENVIDU_SERVER_URL;
+
+    this.createSession = this.createSession.bind(this);
+    this.joinSession = this.joinSession.bind(this);
+    this.leaveSession = this.leaveSession.bind(this);
+    this.handleChangeUserName = this.handleChangeUserName.bind(this);
   }
+
+  sessionId = "WarTec"
+
   static getInitialProps({ query }) {
     return { query }
   }
+
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.onbeforeunload);
+  }
+
   componentDidMount() {
+    window.addEventListener('beforeunload', this.onbeforeunload);
     window.addEventListener('keydown', this.onKeyDown)
     window.addEventListener('keyup', this.onKeyUp)
-    this.getUserMedia().then(() => {
-      console.log('it\'s works!')
-    });
+    this.OpenVidu = require('openvidu-browser').OpenVidu
   }
-  async getUserMedia(cb) {
-    // window.navigator.getUserMedia = navigator.getUserMedia =
-    //   navigator.getUserMedia ||
-    //   navigator.webkitGetUserMedia ||
-    //   navigator.mozGetUserMedia;
-    const op = {
-      video: {
-        width: { min: 160, ideal: 640, max: 1280 },
-        height: { min: 120, ideal: 360, max: 720 }
-      },
-      audio: true
-    };
-    const stream = await navigator.mediaDevices.getUserMedia(op);
-    this.setState({ streamUrl: stream, localStream: stream });
-    this.localVideo.srcObject = stream;
-  }
+
   onKeyDown(event) {
     if (event.repeat) return
     if (!this.state.on) return
@@ -209,6 +213,150 @@ class Home extends React.Component {
         console.log('errr', err);
       })
   }
+
+  async getToken() {
+    const sessionId = await this.createSession(this.state.mySessionId);
+    return await this.createToken(sessionId);
+  }
+
+  joinSession(event) {
+    event.preventDefault();
+    this.OV = new this.OpenVidu();
+    this.setState(
+      {
+        session: this.OV.initSession(),
+      },
+      () => {
+        var mySession = this.state.session;
+
+        mySession.on('streamCreated', (event) => {
+          var subscriber = mySession.subscribe(event.stream, undefined);
+          var subscribers = this.state.subscribers;
+          subscribers.push(subscriber);
+
+          this.setState({
+            subscribers: subscribers,
+          });
+        });
+
+        mySession.on('streamDestroyed', (event) => {
+          this.deleteSubscriber(event.stream.streamManager);
+        });
+
+        this.getToken().then((token) => {
+          mySession
+            .connect(token, {
+              clientData: this.state.myUserName
+            })
+            .then(() => {
+              let publisher = this.OV.initPublisher(undefined, {
+                audioSource: undefined,
+                videoSource: undefined,
+                publishAudio: true,
+                publishVideo: true,
+                resolution: '640x480',
+                frameRate: 30,
+                insertMode: 'APPEND',
+                mirror: false,
+              });
+
+              mySession.publish(publisher);
+
+              this.setState({
+                mainStreamManager: publisher,
+                publisher: publisher,
+              });
+            })
+            .catch((error) => {
+              console.log('There was an error connecting to the session:', error.code, error.message);
+            });
+        });
+      },
+    );
+  }
+
+  leaveSession() {
+
+    const mySession = this.state.session;
+
+    if (mySession) {
+      mySession.disconnect();
+    }
+    this.OV = null;
+    this.setState({
+      session: undefined,
+      subscribers: [],
+      mySessionId: 'SessionA',
+      myUserName: 'Робот ' + Math.floor(Math.random() * 100),
+      mainStreamManager: undefined,
+      publisher: undefined
+    });
+  }
+
+  async createSession() {
+    let response = await fetch(this.OPENVIDU_SERVER_URL + '/api/sessions', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + btoa('OPENVIDUAPP:' + this.OPENVIDU_SERVER_SECRET),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customSessionId: this.sessionId })
+    })
+
+    if (response.status === 200) {
+      let data = await response.json();
+      console.log('CREATE SESION', response);
+      return data.id;
+    } else if (response.status === 409) {
+      console.log('SESSION ALREADY CREATED');
+      return this.sessionId;
+    }
+  }
+
+  async createToken(sessionId) {
+    const response = await fetch(this.OPENVIDU_SERVER_URL + '/api/tokens', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + btoa('OPENVIDUAPP:' + this.OPENVIDU_SERVER_SECRET),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ session: sessionId })
+    })
+
+    if (response.status == 200) {
+      const data = await response.json();
+      console.log('TOKEN', data.token);
+      return data.token;
+    }
+  }
+
+  handleChangeUserName(event) {
+    this.setState({ myUserName: event.target.value })
+  }
+
+  onbeforeunload(event) {
+    this.leaveSession();
+  }
+
+  deleteSubscriber(streamManager) {
+    let subscribers = this.state.subscribers;
+    let index = subscribers.indexOf(streamManager, 0);
+    if (index > -1) {
+        subscribers.splice(index, 1);
+        this.setState({
+            subscribers: subscribers,
+        });
+    }
+  }
+
+  handleMainVideoStream(stream) {
+    if (this.state.mainStreamManager !== stream) {
+      this.setState({
+        mainStreamManager: stream
+      });
+    }
+  }
+
   render() {
     return (
       <div className="container">
@@ -330,15 +478,75 @@ class Home extends React.Component {
 
           </table>
         </div>
-        <video
-          autoPlay
-          id='localVideo'
-          muted
-          ref={video => (this.localVideo = video)}
-        />
-        {/* <iframe id='fp_embed_player' 
-        src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC' 
-        marginwidth='0' marginheight='0' frameborder='0' width='100%' height='400px' scrolling='no' allowfullscreen='allowfullscreen'/> */}
+
+        {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
+          <h1>Подключиться к конференции</h1>
+          <form className="form-group" onSubmit={this.joinSession}>
+            <div>
+              <label>Участник: </label>
+              <input
+                className="form-control"
+                type="text"
+                id="userName"
+                value={this.state.myUserName}
+                onChange={this.handleChangeUserName}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <button className="btn btn-lg btn-success" name="commit" type="submit" >
+                Подключиться
+                </button>
+            </div>
+          </form>
+        </div>}
+        {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
+          <div id="session">
+            <div id="session-header">
+              <h1 id="session-title">{this.sessionId}</h1>
+              <button
+                className="btn btn-large btn-danger"
+                type="button"
+                id="buttonLeaveSession"
+                onClick={this.leaveSession}
+              >
+                Отключиться
+              </button>
+            </div>
+
+            {this.state.mainStreamManager !== undefined ? (
+              <div id="main-video" className="col-md-6">
+                <UserVideoComponent streamManager={this.state.mainStreamManager} />
+              </div>
+            ) : null}
+            <div id="video-container" className="col-md-6">
+              {this.state.publisher !== undefined ? (
+                <div className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(this.state.publisher)}>
+                  <UserVideoComponent
+                    streamManager={this.state.publisher} />
+                </div>
+              ) : null}
+              {this.state.subscribers.map((sub, i) => (
+                <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
+                  <UserVideoComponent streamManager={sub} />
+                </div>
+              ))}
+            </div>
+          </div>
+        }
+        <div className="video-container">
+          <iframe id='fp_embed_player'
+            src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC'
+            marginWidth='0'
+            marginHeight='0'
+            frameBorder='0'
+            width='100%'
+            height='400px'
+            scrolling='no'
+            allowFullScreen='allowfullscreen'
+          />
+        </div>
+
         <style jsx>{`
           .container {
             min-height: 100vh;
@@ -347,6 +555,11 @@ class Home extends React.Component {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+          }
+
+          #video-container,
+          .video-container {
+            width: 640px;
           }
 
           table.log {
