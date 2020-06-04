@@ -22,36 +22,10 @@ let ACCELERATE_KEY_CODE = "Space"
 let ARMOR_KEY_CODE = "Enter"
 let ARMOR_2_KEY_CODE = "ShiftLeft"
 
-class MyForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showOn: true,
-    };
-    this.handleChangeOn = this.handleChangeOn.bind(this);
-  }
-
-  handleChangeOn(event) {
-    this.props.handleChangeOn(event.target.checked);
-  }
-  render() {
-    return (
-      <form>
-        <label>
-          Пуск:
-        <input type="checkbox" checked={this.props.on} onChange={this.handleChangeOn} />
-        </label>
-        <style jsx>{`
-        form {
-          padding-bottom: 1rem;
-        }
-        `}</style>
-      </form>
-    )
-  }
-}
-
-
+const ARROW_LEFT = 'ArrowLeft'
+const ARROW_RIGHT = 'ArrowRight'
+const ARROW_UP = 'ArrowUp'
+const ARROW_DOWN = 'ArrowDown'
 
 class Home extends React.Component {
 
@@ -68,6 +42,8 @@ class Home extends React.Component {
       keylogs: [],
       subscribers: [],
       myUserName: 'Робот ' + Math.floor(Math.random() * 100),
+      alternative_control: false,
+      state: [0, 0, 0, 0]
     }
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
@@ -101,11 +77,41 @@ class Home extends React.Component {
     this.OpenVidu = require('openvidu-browser').OpenVidu
   }
 
+  control(state) {
+    const prev_state = this.state.state;
+    this.setState({
+      state: prev_state.map((value, index) => state[index] + value)
+    }, () => {
+      prev_state.forEach((prev_value, index)=> {
+        if (prev_value <= 0 && this.state.state[index] > 0) {
+          // Turn ON
+          this.callApiBlink([LEFT_PIN, RIGHT_PIN, LEFT_BACK_PIN, RIGHT_BACK_PIN][index], true);
+        }
+        if (prev_value > 0 && this.state.state[index] <= 0) {
+          // Turn OFF
+          this.callApiBlink([LEFT_PIN, RIGHT_PIN, LEFT_BACK_PIN, RIGHT_BACK_PIN][index], false);
+        }
+      });
+    });
+  }
+
   onKeyDown(event) {
     if (event.repeat) return
     if (!this.state.on) return
 
     switch (event.code) {
+      case ARROW_UP:
+        this.control([1, 1, -1, -1]);
+        break;
+      case ARROW_LEFT:
+        this.control([-1, 1, 1, -1]);
+        break;
+      case ARROW_DOWN:
+        this.control([-1, -1, 1, 1]);
+        break;
+      case ARROW_RIGHT:
+        this.control([1, -1, -1, 1]);
+        break;
       case LEFT_FORWARD_KEY_CODE:
         this.setState({ left: true })
         this.callApiBlink(LEFT_PIN, true)
@@ -149,15 +155,34 @@ class Home extends React.Component {
       ].slice(-5)
     })
   }
+
   handleTokenChange(token) {
     this.setState({ token })
   }
-  handleChangeOn(on) {
-    this.setState({ on })
+
+  handleChangeOn(event) {
+    this.setState({ on: event.target.checked })
   }
+
+  handleChangeAlternateControl(event) {
+    this.setState({ alternative_control: event.target.checked })
+  }
+
   onKeyUp(event) {
     if (!this.state.on) return;
     switch (event.code) {
+      case ARROW_UP:
+        this.control([-1, -1, 1, 1]);
+        break;
+      case ARROW_LEFT:
+        this.control([1, -1, -1, 1]);
+        break;
+      case ARROW_DOWN:
+        this.control([1, 1, -1, -1]);
+        break;
+      case ARROW_RIGHT:
+        this.control([-1, 1, 1, -1]);
+        break;
       case LEFT_FORWARD_KEY_CODE:
         this.setState({ left: false })
         this.callApiBlink(LEFT_PIN, false)
@@ -190,6 +215,7 @@ class Home extends React.Component {
         break;
     }
   }
+
   callApiBlink(pin, value) {
     let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value ? 1 : 0}`
     let time = Date.now()
@@ -358,19 +384,18 @@ class Home extends React.Component {
     }
   }
 
-  attachCamera() {
-
-  }
-
   render() {
     return (
       <div className="container">
         <Head>
-          <title>Create Next App</title>
+          <title>WarTec - Robots Battle</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div>
-          <MyForm onChange={this.handleTokenChange} handleChangeOn={this.handleChangeOn} on={this.state.on} token={this.state.token} />
+          <div className="form-check">
+            <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
+            <label className="form-check-label">Пуск</label>
+          </div>
           {this.state.logs.length > 0 && <table className="log">
             <thead>
               <tr>
@@ -529,7 +554,7 @@ class Home extends React.Component {
               </div>
             ) : null}
             <div id="video-container" className="col-md-6 col-12">
-            <label>Участники: {this.state.subscribers.length + 1}</label>
+              <label>Участники: {this.state.subscribers.length + 1}</label>
               <div className="row">
                 {this.state.publisher !== undefined ? (
                   <div className="stream-container col-md-6 col-xs-6 col-12"
