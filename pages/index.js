@@ -82,7 +82,7 @@ class Home extends React.Component {
     this.setState({
       state: prev_state.map((value, index) => state[index] + value)
     }, () => {
-      prev_state.forEach((prev_value, index)=> {
+      prev_state.forEach((prev_value, index) => {
         if (prev_value <= 0 && this.state.state[index] > 0) {
           // Turn ON
           this.callApiBlink([LEFT_PIN, RIGHT_PIN, LEFT_BACK_PIN, RIGHT_BACK_PIN][index], true);
@@ -96,9 +96,9 @@ class Home extends React.Component {
   }
 
   onKeyDown(event) {
-    if (event.repeat) return
     if (!this.state.on) return
-
+    event.preventDefault()
+    if (event.repeat) return
     switch (event.code) {
       case ARROW_UP:
         this.control([1, 1, -1, -1]);
@@ -150,7 +150,7 @@ class Home extends React.Component {
         {
           time: new Date(),
           code: event.code,
-          key: Date.now()
+          key: Math.random()
         }
       ].slice(-5)
     })
@@ -170,6 +170,7 @@ class Home extends React.Component {
 
   onKeyUp(event) {
     if (!this.state.on) return;
+
     switch (event.code) {
       case ARROW_UP:
         this.control([-1, -1, 1, 1]);
@@ -223,22 +224,19 @@ class Home extends React.Component {
     fetch(url)
       .then(response => {
         console.log(response.status)
-        this.setState({
-          logs: [
-            ...this.state.logs,
-            {
-              key: time,
-              status: response.status,
-              time: new Date(),
-              message: url,
-              ping: Date.now() - time
-            }
-          ].slice(-5)
-        })
+        const logs = [
+          ...this.state.logs,
+          {
+            key: Math.random().toString(),
+            status: response.status,
+            time: new Date(),
+            message: url,
+            ping: Date.now() - time
+          }
+        ].slice(-5);
+        this.setState({ logs })
       })
-      .catch(err => {
-        console.log('errr', err);
-      })
+      .catch(err => { })
   }
 
   async getToken() {
@@ -396,63 +394,6 @@ class Home extends React.Component {
             <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
             <label className="form-check-label">Пуск</label>
           </div>
-          {this.state.logs.length > 0 && <table className="log">
-            <thead>
-              <tr>
-                <th>
-                  Time
-                </th>
-                <th>
-                  HTTP code
-                </th>
-                <th>
-                  Команда
-                </th>
-                <th>
-                  Пинг
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                this.state.logs.map(log => {
-                  return <tr key={log.key}>
-                    <td>
-                      {log.time.toString()}
-                    </td>
-                    <td>
-                      {log.status}
-                    </td>
-                    <td>
-                      {log.message}
-                    </td>
-                    <td>
-                      {log.ping} мс
-                  </td>
-                  </tr>
-                })
-              }
-            </tbody>
-          </table>}
-          {this.state.keylogs.length > 0 && <table className="log">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Key code</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                this.state.keylogs.map(log =>
-                  <tr key={log.key}>
-                    <td>{log.time.toString()}</td>
-                    <td>{log.code}</td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </table>}
-
           <h3>Инструкция</h3>
           <ol>
             <li>Включить Пуск.</li>
@@ -585,7 +526,62 @@ class Home extends React.Component {
             allowFullScreen='allowfullscreen'
           />
         </div>
-
+        {this.state.logs.length > 0 && <table className="log">
+          <thead>
+            <tr>
+              <th>
+                Time
+                </th>
+              <th>
+                HTTP code
+                </th>
+              <th>
+                Команда
+                </th>
+              <th>
+                Пинг
+                </th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              this.state.logs.map(log => {
+                return <tr key={log.key}>
+                  <td>
+                    {log.time.toString()}
+                  </td>
+                  <td>
+                    {log.status}
+                  </td>
+                  <td>
+                    {log.message}
+                  </td>
+                  <td>
+                    {log.ping} мс
+                  </td>
+                </tr>
+              })
+            }
+          </tbody>
+        </table>}
+        {this.state.keylogs.length > 0 && <table className="log">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Key code</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              this.state.keylogs.map(log =>
+                <tr key={log.key}>
+                  <td>{log.time.toString()}</td>
+                  <td>{log.code}</td>
+                </tr>
+              )
+            }
+          </tbody>
+        </table>}
         <style jsx>{`
           .container {
             min-height: 100vh;
