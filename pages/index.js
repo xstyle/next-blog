@@ -22,10 +22,10 @@ let ACCELERATE_KEY_CODE = "Space"
 let ARMOR_KEY_CODE = "Enter"
 let ARMOR_2_KEY_CODE = "ShiftLeft"
 
-const ARROW_LEFT = 'ArrowLeft'
-const ARROW_RIGHT = 'ArrowRight'
-const ARROW_UP = 'ArrowUp'
-const ARROW_DOWN = 'ArrowDown'
+let ARROW_LEFT = 'ArrowLeft'
+let ARROW_RIGHT = 'ArrowRight'
+let ARROW_UP = 'ArrowUp'
+let ARROW_DOWN = 'ArrowDown'
 
 class Home extends React.Component {
 
@@ -58,6 +58,10 @@ class Home extends React.Component {
     this.joinSession = this.joinSession.bind(this);
     this.leaveSession = this.leaveSession.bind(this);
     this.handleChangeUserName = this.handleChangeUserName.bind(this);
+    if (props.router.query.invert) {
+      ARROW_LEFT = 'ArrowRight'
+      ARROW_RIGHT = 'ArrowLeft'
+    }
   }
 
   sessionId = "WarTec"
