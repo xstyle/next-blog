@@ -62,6 +62,7 @@ class Home extends React.Component {
       ARROW_LEFT = 'ArrowRight'
       ARROW_RIGHT = 'ArrowLeft'
     }
+    this.myRef = React.createRef();
   }
 
   sessionId = "WarTec"
@@ -76,9 +77,15 @@ class Home extends React.Component {
 
   componentDidMount() {
     window.addEventListener('beforeunload', this.onbeforeunload);
-    window.addEventListener('keydown', this.onKeyDown)
-    window.addEventListener('keyup', this.onKeyUp)
-    this.OpenVidu = require('openvidu-browser').OpenVidu
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+    this.OpenVidu = require('openvidu-browser').OpenVidu;
+
+    require('webrtc-streamer/html/libs/adapter.min');
+    const WebRtcStreamer = require('../components/webrtcstreamer.js');
+    this.webRtcServer = new WebRtcStreamer(this.myRef.current, "https://webrtc-streamer.herokuapp.com");
+    //this.webRtcServer.connect("rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream");
+    this.webRtcServer.connect("rtsp://srv13.arkasis.nl:80/498/default.stream");
   }
 
   control(state) {
@@ -388,210 +395,205 @@ class Home extends React.Component {
 
   render() {
     return (
-      <div className="container">
+      <div className="container-fluid">
         <Head>
           <title>WarTec - Robots Battle</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div>
-          <div className="form-check">
-            <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
-            <label className="form-check-label">Пуск</label>
+        <div className="row">
+          <div className="col-12 col-lg-9"><video ref={this.myRef} /></div>
+
+
+
+
+          <div className="col-12 col-lg-3">
+            <div className="form-check">
+              <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
+              <label className="form-check-label">Пуск</label>
+            </div>
+            <h3>Инструкция</h3>
+            <ol>
+              <li>Включить Пуск.</li>
+              <li>Управлять кнопками <b>W</b> - вперед влево, <b>S</b> - назад влево, <b>P</b> - вперед вправо, <b>L</b> - назад вправо, <b>Пробел</b> - ускорение, <b>Левый Shift</b> - Доспехи, <b>Enter</b> - Доспехи 2.</li>
+              <li>В логах видно время запроса, код ответа сервера, команда и время выполнения запроса.</li>
+            </ol>
+            <h3>Настройки</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Команда</th>
+                  <th>Key code</th>
+                  <th>Pin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className={this.state.left ? "active" : ""}>
+                  <td>Влево вперед</td>
+                  <td>{LEFT_FORWARD_KEY_CODE}</td>
+                  <td>{LEFT_PIN}</td>
+                </tr>
+                <tr className={this.state.right ? "active" : ""}>
+                  <td>Вправо вперед</td>
+                  <td>{RIGHT_FORWARD_KEY_CODE}</td>
+                  <td>{RIGHT_PIN}</td>
+                </tr>
+                <tr className={this.state.left_back ? "active" : ""}>
+                  <td>Влево назад</td>
+                  <td>{LEFT_BACK_KEY_CODE}</td>
+                  <td>{LEFT_BACK_PIN}</td>
+                </tr>
+                <tr className={this.state.right_back ? "active" : ""}>
+                  <td>Вправо назад</td>
+                  <td>{RIGHT_BACK_KEY_CODE}</td>
+                  <td>{RIGHT_BACK_PIN}</td>
+                </tr>
+                <tr className={this.state.accelerate ? "active" : ""}>
+                  <td>Ускорение</td>
+                  <td>{ACCELERATE_KEY_CODE}</td>
+                  <td>{ACCELERATE_PIN}</td>
+                </tr>
+                <tr className={this.state.armor ? "active" : ""}>
+                  <td>Доспехи</td>
+                  <td>{ARMOR_KEY_CODE}</td>
+                  <td>{ARMOR_PIN}</td>
+                </tr>
+                <tr className={this.state.armor_2 ? "active" : ""}>
+                  <td>Доспехи 2</td>
+                  <td>{ARMOR_2_KEY_CODE}</td>
+                  <td>{ARMOR_2_PIN}</td>
+                </tr>
+              </tbody>
+
+            </table>
           </div>
-          <h3>Инструкция</h3>
-          <ol>
-            <li>Включить Пуск.</li>
-            <li>Управлять кнопками <b>W</b> - вперед влево, <b>S</b> - назад влево, <b>P</b> - вперед вправо, <b>L</b> - назад вправо, <b>Пробел</b> - ускорение, <b>Левый Shift</b> - Доспехи, <b>Enter</b> - Доспехи 2.</li>
-            <li>В логах видно время запроса, код ответа сервера, команда и время выполнения запроса.</li>
-          </ol>
-          <h3>Настройки</h3>
-          <table>
+
+          {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
+            <h3>Конференция</h3>
+            <form onSubmit={this.joinSession}>
+              <div className="form-group">
+                <label>Участник: </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  id="userName"
+                  value={this.state.myUserName}
+                  onChange={this.handleChangeUserName}
+                  required
+                />
+                <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
+              </div>
+              <div className="form-group">
+                <button className="btn btn-lg btn-success" name="commit" type="submit" >
+                  Подключиться
+                </button>
+              </div>
+            </form>
+          </div>}
+          {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
+            <div id="session" className="row" >
+              <div id="session-header" className="col-12">
+                <h2 id="session-title">Комната: {this.sessionId}</h2>
+                <div className="form-group">
+                  <button
+                    className="btn btn-large btn-danger"
+                    type="button"
+                    id="buttonLeaveSession"
+                    onClick={this.leaveSession}
+                  >
+                    Отключиться
+                  </button>
+                </div>
+              </div>
+              {this.state.mainStreamManager !== undefined ? (
+                <div id="main-video" className="col-md-6 col-12">
+                  <UserVideoComponent streamManager={this.state.mainStreamManager} />
+                </div>
+              ) : null}
+              <div id="video-container" className="col-md-6 col-12">
+                <label>Участники: {this.state.subscribers.length + 1}</label>
+                <div className="row">
+                  {this.state.publisher !== undefined ? (
+                    <div className="stream-container col-md-6 col-xs-6 col-12"
+                      onClick={() => this.handleMainVideoStream(this.state.publisher)}>
+                      <UserVideoComponent streamManager={this.state.publisher} />
+                    </div>
+                  ) : null}
+                  {this.state.subscribers.map((sub, i) => (
+                    <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
+                      <UserVideoComponent streamManager={sub} />
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          }
+          {this.state.logs.length > 0 && <table className="log">
             <thead>
               <tr>
-                <th>Команда</th>
-                <th>Key code</th>
-                <th>Pin</th>
+                <th>
+                  Time
+                </th>
+                <th>
+                  HTTP code
+                </th>
+                <th>
+                  Команда
+                </th>
+                <th>
+                  Пинг
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr className={this.state.left ? "active" : ""}>
-                <td>Влево вперед</td>
-                <td>{LEFT_FORWARD_KEY_CODE}</td>
-                <td>{LEFT_PIN}</td>
-              </tr>
-              <tr className={this.state.right ? "active" : ""}>
-                <td>Вправо вперед</td>
-                <td>{RIGHT_FORWARD_KEY_CODE}</td>
-                <td>{RIGHT_PIN}</td>
-              </tr>
-              <tr className={this.state.left_back ? "active" : ""}>
-                <td>Влево назад</td>
-                <td>{LEFT_BACK_KEY_CODE}</td>
-                <td>{LEFT_BACK_PIN}</td>
-              </tr>
-              <tr className={this.state.right_back ? "active" : ""}>
-                <td>Вправо назад</td>
-                <td>{RIGHT_BACK_KEY_CODE}</td>
-                <td>{RIGHT_BACK_PIN}</td>
-              </tr>
-              <tr className={this.state.accelerate ? "active" : ""}>
-                <td>Ускорение</td>
-                <td>{ACCELERATE_KEY_CODE}</td>
-                <td>{ACCELERATE_PIN}</td>
-              </tr>
-              <tr className={this.state.armor ? "active" : ""}>
-                <td>Доспехи</td>
-                <td>{ARMOR_KEY_CODE}</td>
-                <td>{ARMOR_PIN}</td>
-              </tr>
-              <tr className={this.state.armor_2 ? "active" : ""}>
-                <td>Доспехи 2</td>
-                <td>{ARMOR_2_KEY_CODE}</td>
-                <td>{ARMOR_2_PIN}</td>
-              </tr>
+              {
+                this.state.logs.map(log => {
+                  return <tr key={log.key}>
+                    <td>
+                      {log.time.toString()}
+                    </td>
+                    <td>
+                      {log.status}
+                    </td>
+                    <td>
+                      {log.message}
+                    </td>
+                    <td>
+                      {log.ping} мс
+                  </td>
+                  </tr>
+                })
+              }
             </tbody>
-
-          </table>
+          </table>}
+          {this.state.keylogs.length > 0 && <table className="log">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Key code</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                this.state.keylogs.map(log =>
+                  <tr key={log.key}>
+                    <td>{log.time.toString()}</td>
+                    <td>{log.code}</td>
+                  </tr>
+                )
+              }
+            </tbody>
+          </table>}
         </div>
-
-        {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
-          <h3>Конференция</h3>
-          <form onSubmit={this.joinSession}>
-            <div className="form-group">
-              <label>Участник: </label>
-              <input
-                className="form-control"
-                type="text"
-                id="userName"
-                value={this.state.myUserName}
-                onChange={this.handleChangeUserName}
-                required
-              />
-              <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
-            </div>
-            <div className="form-group">
-              <button className="btn btn-lg btn-success" name="commit" type="submit" >
-                Подключиться
-                </button>
-            </div>
-          </form>
-        </div>}
-        {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
-          <div id="session" className="row" >
-            <div id="session-header" className="col-12">
-              <h2 id="session-title">Комната: {this.sessionId}</h2>
-              <div className="form-group">
-                <button
-                  className="btn btn-large btn-danger"
-                  type="button"
-                  id="buttonLeaveSession"
-                  onClick={this.leaveSession}
-                >
-                  Отключиться
-              </button>
-              </div>
-
-            </div>
-
-            {this.state.mainStreamManager !== undefined ? (
-              <div id="main-video" className="col-md-6 col-12">
-                <UserVideoComponent streamManager={this.state.mainStreamManager} />
-              </div>
-            ) : null}
-            <div id="video-container" className="col-md-6 col-12">
-              <label>Участники: {this.state.subscribers.length + 1}</label>
-              <div className="row">
-                {this.state.publisher !== undefined ? (
-                  <div className="stream-container col-md-6 col-xs-6 col-12"
-                    onClick={() => this.handleMainVideoStream(this.state.publisher)}>
-                    <UserVideoComponent
-                      streamManager={this.state.publisher} />
-                  </div>
-                ) : null}
-                {this.state.subscribers.map((sub, i) => (
-                  <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
-                    <UserVideoComponent streamManager={sub} />
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        }
-        <div className="video-container pt-4">
-          <iframe id='fp_embed_player'
-            src='https://demo.flashphoner.com:8888/embed_player?urlServer=wss://demo.flashphoner.com:8443&streamName=rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream&mediaProviders=WebRTC'
-            marginWidth='0'
-            marginHeight='0'
-            frameBorder='0'
-            width='100%'
-            height='400px'
-            scrolling='no'
-            allowFullScreen='allowfullscreen'
-          />
-        </div>
-        {this.state.logs.length > 0 && <table className="log">
-          <thead>
-            <tr>
-              <th>
-                Time
-                </th>
-              <th>
-                HTTP code
-                </th>
-              <th>
-                Команда
-                </th>
-              <th>
-                Пинг
-                </th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              this.state.logs.map(log => {
-                return <tr key={log.key}>
-                  <td>
-                    {log.time.toString()}
-                  </td>
-                  <td>
-                    {log.status}
-                  </td>
-                  <td>
-                    {log.message}
-                  </td>
-                  <td>
-                    {log.ping} мс
-                  </td>
-                </tr>
-              })
-            }
-          </tbody>
-        </table>}
-        {this.state.keylogs.length > 0 && <table className="log">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Key code</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              this.state.keylogs.map(log =>
-                <tr key={log.key}>
-                  <td>{log.time.toString()}</td>
-                  <td>{log.code}</td>
-                </tr>
-              )
-            }
-          </tbody>
-        </table>}
         <style jsx>{`
           .container {
             min-height: 100vh;
             padding: 0 0.5rem;
           }
 
+          video {
+            width: 100%;
+          }
           #video-container,
           .video-container {
             max-width: 640px;
