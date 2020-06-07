@@ -2,33 +2,57 @@ import Head from 'next/head'
 import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../components/UserVideoComponent'
 
-let LEFT_PIN = 'D4'
-let RIGHT_PIN = 'D16'
+const WEBRTC_SERVER = 'https://wartec.ddns.net:8000'
+const RTSP_STREAM = 'rtsp://wartec.ddns.net:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream'
 
-let LEFT_BACK_PIN = 'D14'
-let RIGHT_BACK_PIN = 'D5'
+const SESSION_ID = 'WarTec'
 
-let ARMOR_PIN = 'D12'
-let ARMOR_2_PIN = 'D13'
-let ACCELERATE_PIN = 'D0'
+const LEFT_PIN = 'D4'
+const RIGHT_PIN = 'D16'
+
+const LEFT_BACK_PIN = 'D14'
+const RIGHT_BACK_PIN = 'D5'
+
+const ARMOR_PIN = 'D12'
+const ARMOR_2_PIN = 'D13'
+const ACCELERATE_PIN = 'D0'
 
 
-let LEFT_FORWARD_KEY_CODE = "KeyW"
-let RIGHT_FORWARD_KEY_CODE = "KeyP"
+const LEFT_FORWARD_KEY_CODE = "KeyW"
+const RIGHT_FORWARD_KEY_CODE = "KeyP"
 
-let LEFT_BACK_KEY_CODE = "KeyS"
-let RIGHT_BACK_KEY_CODE = "KeyL"
-let ACCELERATE_KEY_CODE = "Space"
-let ARMOR_KEY_CODE = "Enter"
-let ARMOR_2_KEY_CODE = "ShiftLeft"
+const LEFT_BACK_KEY_CODE = "KeyS"
+const RIGHT_BACK_KEY_CODE = "KeyL"
+const ACCELERATE_KEY_CODE = "Space"
+const ARMOR_KEY_CODE = "Enter"
+const ARMOR_2_KEY_CODE = "ShiftLeft"
 
 let ARROW_LEFT = 'ArrowLeft'
 let ARROW_RIGHT = 'ArrowRight'
-let ARROW_UP = 'ArrowUp'
-let ARROW_DOWN = 'ArrowDown'
+const ARROW_UP = 'ArrowUp'
+const ARROW_DOWN = 'ArrowDown'
+
+const FORWARD_MOVE_PIN = 'V1'
+const LEFT_FORWARD_MOVE_PIN = 'V2'
+const LEFT_ROTATE_MOVE_PIN = 'V3'
+const LEFT_BACKWARD_MOVE_PIN = 'V4'
+const BACKWARD_MOVE_PIN = 'V5'
+const RIGHT_BACKWARD_MOVE_PIN = 'V6'
+const RIGHT_ROTATE_MOVE_PIN = 'V7'
+const RIGHT_FORWARD_MOVE_PIN = 'V8'
+
+const MOVE_STATES = {
+  '1100': FORWARD_MOVE_PIN,
+  '0100': LEFT_FORWARD_MOVE_PIN,
+  '0110': LEFT_ROTATE_MOVE_PIN,
+  '0001': LEFT_BACKWARD_MOVE_PIN,
+  '0011': BACKWARD_MOVE_PIN,
+  '0010': RIGHT_BACKWARD_MOVE_PIN,
+  '1001': RIGHT_ROTATE_MOVE_PIN,
+  '1000': RIGHT_FORWARD_MOVE_PIN
+}
 
 class Home extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -58,6 +82,7 @@ class Home extends React.Component {
     this.joinSession = this.joinSession.bind(this);
     this.leaveSession = this.leaveSession.bind(this);
     this.handleChangeUserName = this.handleChangeUserName.bind(this);
+
     if (props.router.query.invert) {
       ARROW_LEFT = 'ArrowRight'
       ARROW_RIGHT = 'ArrowLeft'
@@ -65,7 +90,7 @@ class Home extends React.Component {
     this.myRef = React.createRef();
   }
 
-  sessionId = "WarTec"
+  sessionId = SESSION_ID
 
   static getInitialProps({ query }) {
     return { query }
@@ -73,6 +98,7 @@ class Home extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
+    this.webRtcServer.disconnect()
   }
 
   componentDidMount() {
@@ -83,9 +109,8 @@ class Home extends React.Component {
 
     require('webrtc-streamer/html/libs/adapter.min');
     const WebRtcStreamer = require('../components/webrtcstreamer.js');
-    this.webRtcServer = new WebRtcStreamer(this.myRef.current, "https://webrtc-streamer.herokuapp.com");
-    //this.webRtcServer.connect("rtsp://178.141.81.193:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream");
-    this.webRtcServer.connect("rtsp://srv13.arkasis.nl:80/498/default.stream");
+    this.webRtcServer = new WebRtcStreamer(this.myRef.current, WEBRTC_SERVER);
+    this.webRtcServer.connect(RTSP_STREAM);
   }
 
   control(state) {
@@ -93,16 +118,13 @@ class Home extends React.Component {
     this.setState({
       state: prev_state.map((value, index) => state[index] + value)
     }, () => {
-      prev_state.forEach((prev_value, index) => {
-        if (prev_value <= 0 && this.state.state[index] > 0) {
-          // Turn ON
-          this.callApiBlink([LEFT_PIN, RIGHT_PIN, LEFT_BACK_PIN, RIGHT_BACK_PIN][index], true);
-        }
-        if (prev_value > 0 && this.state.state[index] <= 0) {
-          // Turn OFF
-          this.callApiBlink([LEFT_PIN, RIGHT_PIN, LEFT_BACK_PIN, RIGHT_BACK_PIN][index], false);
-        }
-      });
+      const move_state = this.state.state.map(item => item > 0 ? 1 : 0).join('');
+      if (move_state === '0000') {
+        const prev_move_state = prev_state.map(item => item > 0 ? 1 : 0).join('');
+        this.callApiBlink(MOVE_STATES[prev_move_state], false);
+      } else {
+        this.callApiBlink(MOVE_STATES[move_state], true);
+      }
     });
   }
 
@@ -394,18 +416,14 @@ class Home extends React.Component {
   }
 
   render() {
-    return (
+    return (<>
       <div className="container-fluid">
         <Head>
           <title>WarTec - Robots Battle</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
-          <div className="col-12 col-lg-9"><video ref={this.myRef} /></div>
-
-
-
-
+          <div className="col-12 col-lg-9 p-0"><video ref={this.myRef} controls autoPlay /></div>
           <div className="col-12 col-lg-3">
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
@@ -466,68 +484,6 @@ class Home extends React.Component {
 
             </table>
           </div>
-
-          {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
-            <h3>Конференция</h3>
-            <form onSubmit={this.joinSession}>
-              <div className="form-group">
-                <label>Участник: </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  id="userName"
-                  value={this.state.myUserName}
-                  onChange={this.handleChangeUserName}
-                  required
-                />
-                <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
-              </div>
-              <div className="form-group">
-                <button className="btn btn-lg btn-success" name="commit" type="submit" >
-                  Подключиться
-                </button>
-              </div>
-            </form>
-          </div>}
-          {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
-            <div id="session" className="row" >
-              <div id="session-header" className="col-12">
-                <h2 id="session-title">Комната: {this.sessionId}</h2>
-                <div className="form-group">
-                  <button
-                    className="btn btn-large btn-danger"
-                    type="button"
-                    id="buttonLeaveSession"
-                    onClick={this.leaveSession}
-                  >
-                    Отключиться
-                  </button>
-                </div>
-              </div>
-              {this.state.mainStreamManager !== undefined ? (
-                <div id="main-video" className="col-md-6 col-12">
-                  <UserVideoComponent streamManager={this.state.mainStreamManager} />
-                </div>
-              ) : null}
-              <div id="video-container" className="col-md-6 col-12">
-                <label>Участники: {this.state.subscribers.length + 1}</label>
-                <div className="row">
-                  {this.state.publisher !== undefined ? (
-                    <div className="stream-container col-md-6 col-xs-6 col-12"
-                      onClick={() => this.handleMainVideoStream(this.state.publisher)}>
-                      <UserVideoComponent streamManager={this.state.publisher} />
-                    </div>
-                  ) : null}
-                  {this.state.subscribers.map((sub, i) => (
-                    <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
-                      <UserVideoComponent streamManager={sub} />
-                    </div>
-                  ))}
-                </div>
-
-              </div>
-            </div>
-          }
           {this.state.logs.length > 0 && <table className="log">
             <thead>
               <tr>
@@ -590,7 +546,6 @@ class Home extends React.Component {
             min-height: 100vh;
             padding: 0 0.5rem;
           }
-
           video {
             width: 100%;
           }
@@ -738,6 +693,8 @@ class Home extends React.Component {
             font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
               Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
               sans-serif;
+            background-color: #333;
+            color: white;  
           }
 
           * {
@@ -745,6 +702,70 @@ class Home extends React.Component {
           }
         `}</style>
       </div>
+      <div className="container">
+        {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
+          <h3>Конференция</h3>
+          <form onSubmit={this.joinSession}>
+            <div className="form-group">
+              <label>Участник: </label>
+              <input
+                className="form-control"
+                type="text"
+                id="userName"
+                value={this.state.myUserName}
+                onChange={this.handleChangeUserName}
+                required
+              />
+              <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
+            </div>
+            <div className="form-group">
+              <button className="btn btn-lg btn-success" name="commit" type="submit" >
+                Подключиться
+                </button>
+            </div>
+          </form>
+        </div>}
+        {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
+          <div id="session" className="row" >
+            <div id="session-header" className="col-12">
+              <h2 id="session-title">Комната: {this.sessionId}</h2>
+              <div className="form-group">
+                <button
+                  className="btn btn-large btn-danger"
+                  type="button"
+                  id="buttonLeaveSession"
+                  onClick={this.leaveSession}
+                >
+                  Отключиться
+                  </button>
+              </div>
+            </div>
+            {this.state.mainStreamManager !== undefined ? (
+              <div id="main-video" className="col-md-6 col-12">
+                <UserVideoComponent streamManager={this.state.mainStreamManager} />
+              </div>
+            ) : null}
+            <div id="video-container" className="col-md-6 col-12">
+              <label>Участники: {this.state.subscribers.length + 1}</label>
+              <div className="row">
+                {this.state.publisher !== undefined ? (
+                  <div className="stream-container col-md-6 col-xs-6 col-12"
+                    onClick={() => this.handleMainVideoStream(this.state.publisher)}>
+                    <UserVideoComponent streamManager={this.state.publisher} />
+                  </div>
+                ) : null}
+                {this.state.subscribers.map((sub, i) => (
+                  <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
+                    <UserVideoComponent streamManager={sub} />
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          </div>
+        }
+      </div>
+    </>
     )
   }
 
