@@ -114,7 +114,7 @@ export default class Demo extends React.Component {
                     <div>{this.state.rotate}˚</div> */}
                     <div className="front-wheel wheel"></div>
                     <div className="rear-wheel wheel"></div>
-                    <div className="circular-saw gly-spin">+</div>
+                    <div className={{ "circular-saw": true }}>+</div>
                 </div>
             </div>
             <style jsx>{`
@@ -165,9 +165,11 @@ export default class Demo extends React.Component {
                     background-color: red;
                     z-index: 10;
                     border: 3px dotted black;
-                    animation:spin 1s linear infinite;
                     text-align: center;
                     padding: 4px;
+                }
+                .rotate {
+                    animation: spin 1s linear infinite;
                 }
                 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
