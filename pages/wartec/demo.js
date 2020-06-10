@@ -4,6 +4,7 @@ const ARROW_UP = 'ArrowUp'
 const ARROW_DOWN = 'ArrowDown'
 const ARROW_LEFT = 'ArrowLeft'
 const ARROW_RIGHT = 'ArrowRight'
+const SHIFT_LEFT = 'ShiftLeft'
 
 const SPEED = 2;
 
@@ -64,36 +65,42 @@ export default class Demo extends React.Component {
         switch (event.code) {
             case ARROW_UP:
                 this.setState({ arrow_up: true })
-                break;
+                break
             case ARROW_DOWN:
                 this.setState({ arrow_down: true })
-                break;
+                break
             case ARROW_LEFT:
                 this.setState({ arrow_left: true })
-                break;
+                break
             case ARROW_RIGHT:
                 this.setState({ arrow_right: true })
-                break;
+                break
+            case SHIFT_LEFT:
+                this.setState({ shift_left: true })
+                break
             default:
-                break;
+                break
         }
     }
     handleKeyUp(event) {
         switch (event.code) {
             case ARROW_UP:
                 this.setState({ arrow_up: false })
-                break;
+                break
             case ARROW_DOWN:
                 this.setState({ arrow_down: false })
-                break;
+                break
             case ARROW_LEFT:
                 this.setState({ arrow_left: false })
-                break;
+                break
             case ARROW_RIGHT:
                 this.setState({ arrow_right: false })
-                break;
+                break
+            case SHIFT_LEFT:
+                this.setState({ shift_left: false })
+                break
             default:
-                break;
+                break
         }
     }
     render() {
@@ -114,7 +121,7 @@ export default class Demo extends React.Component {
                     <div>{this.state.rotate}˚</div> */}
                     <div className="front-wheel wheel"></div>
                     <div className="rear-wheel wheel"></div>
-                    <div className={{ "circular-saw": true }}>+</div>
+                    <div className={"circular-saw" + (this.state.shift_left ? " rotate" : "")}>+</div>
                 </div>
             </div>
             <style jsx>{`
