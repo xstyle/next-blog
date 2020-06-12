@@ -43,6 +43,8 @@ const MOVE_STATES = {
   '1000': 8
 }
 
+const CONTROL_VIRTUAL_PIN = 'V30'
+
 class Home extends React.Component {
   constructor(props) {
     super(props)
@@ -83,6 +85,9 @@ class Home extends React.Component {
 
   sessionId = SESSION_ID
 
+  control_session_id = Math.round(Date.now() / 1000)
+  step = 0
+
   static getInitialProps({ query }) {
     return { query }
   }
@@ -110,7 +115,7 @@ class Home extends React.Component {
       state: prev_state.map((value, index) => state[index] + value)
     }, () => {
       const move_state = this.state.state.map(item => item > 0 ? 1 : 0).join('');
-      this.callApiBlink('V30', MOVE_STATES[move_state]);
+      this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
     });
   }
 
@@ -236,9 +241,22 @@ class Home extends React.Component {
     }
   }
 
-  callApiBlink(pin, value) {
-    let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value ? 1 : 0}`
+  log() {
     let time = Date.now()
+    this.last_request = this.last_request || time
+    let interval = this.last_request - time
+    this.last_request = time
+
+    console.log('Time last request', interval)
+  }
+
+  callApiBlink(pin, value) {
+    ++this.step
+
+    let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value ? 1 : 0}&value=${this.control_session_id}&value=${this.step}`
+    let time = Date.now()
+    
+    this.log()
 
     fetch(url)
       .then(response => {
