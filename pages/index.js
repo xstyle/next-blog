@@ -17,7 +17,6 @@ const ARMOR_PIN = 'D12'
 const ARMOR_2_PIN = 'D13'
 const ACCELERATE_PIN = 'D0'
 
-
 const LEFT_FORWARD_KEY_CODE = "KeyW"
 const RIGHT_FORWARD_KEY_CODE = "KeyP"
 
@@ -32,24 +31,16 @@ let ARROW_RIGHT = 'ArrowRight'
 const ARROW_UP = 'ArrowUp'
 const ARROW_DOWN = 'ArrowDown'
 
-const FORWARD_MOVE_PIN = 'V1'
-const LEFT_FORWARD_MOVE_PIN = 'V2'
-const LEFT_ROTATE_MOVE_PIN = 'V3'
-const LEFT_BACKWARD_MOVE_PIN = 'V4'
-const BACKWARD_MOVE_PIN = 'V5'
-const RIGHT_BACKWARD_MOVE_PIN = 'V6'
-const RIGHT_ROTATE_MOVE_PIN = 'V7'
-const RIGHT_FORWARD_MOVE_PIN = 'V8'
-
 const MOVE_STATES = {
-  '1100': FORWARD_MOVE_PIN,
-  '0100': LEFT_FORWARD_MOVE_PIN,
-  '0110': LEFT_ROTATE_MOVE_PIN,
-  '0001': LEFT_BACKWARD_MOVE_PIN,
-  '0011': BACKWARD_MOVE_PIN,
-  '0010': RIGHT_BACKWARD_MOVE_PIN,
-  '1001': RIGHT_ROTATE_MOVE_PIN,
-  '1000': RIGHT_FORWARD_MOVE_PIN
+  '0000': 0,
+  '1100': 1,
+  '0100': 2,
+  '0110': 3,
+  '0001': 4,
+  '0011': 5,
+  '0010': 6,
+  '1001': 7,
+  '1000': 8
 }
 
 class Home extends React.Component {
@@ -119,12 +110,7 @@ class Home extends React.Component {
       state: prev_state.map((value, index) => state[index] + value)
     }, () => {
       const move_state = this.state.state.map(item => item > 0 ? 1 : 0).join('');
-      if (move_state === '0000') {
-        const prev_move_state = prev_state.map(item => item > 0 ? 1 : 0).join('');
-        this.callApiBlink(MOVE_STATES[prev_move_state], false);
-      } else {
-        this.callApiBlink(MOVE_STATES[move_state], true);
-      }
+      this.callApiBlink('V30', MOVE_STATES[move_state]);
     });
   }
 
