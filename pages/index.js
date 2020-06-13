@@ -138,31 +138,31 @@ class Home extends React.Component {
         break;
       case LEFT_FORWARD_KEY_CODE:
         this.setState({ left: true })
-        this.callApiBlink(LEFT_PIN, true)
+        this.callApiBlink(LEFT_PIN, 1)
         break
       case RIGHT_FORWARD_KEY_CODE:
         this.setState({ right: true })
-        this.callApiBlink(RIGHT_PIN, true)
+        this.callApiBlink(RIGHT_PIN, 1)
         break
       case LEFT_BACK_KEY_CODE:
         this.setState({ left_back: true })
-        this.callApiBlink(LEFT_BACK_PIN, true)
+        this.callApiBlink(LEFT_BACK_PIN, 1)
         break
       case RIGHT_BACK_KEY_CODE:
         this.setState({ right_back: true })
-        this.callApiBlink(RIGHT_BACK_PIN, true)
+        this.callApiBlink(RIGHT_BACK_PIN, 1)
         break
       case ACCELERATE_KEY_CODE:
         this.setState({ accelerate: true })
-        this.callApiBlink(ACCELERATE_PIN, true)
+        this.callApiBlink(ACCELERATE_PIN, 1)
         break
       case ARMOR_KEY_CODE:
         this.setState({ armor: true })
-        this.callApiBlink(ARMOR_PIN, true)
+        this.callApiBlink(ARMOR_PIN, 1)
         break
       case ARMOR_2_KEY_CODE:
         this.setState({ armor_2: true })
-        this.callApiBlink(ARMOR_2_PIN, true)
+        this.callApiBlink(ARMOR_2_PIN, 1)
         break
 
       default:
@@ -210,31 +210,31 @@ class Home extends React.Component {
         break;
       case LEFT_FORWARD_KEY_CODE:
         this.setState({ left: false })
-        this.callApiBlink(LEFT_PIN, false)
+        this.callApiBlink(LEFT_PIN, 0)
         break;
       case RIGHT_FORWARD_KEY_CODE:
         this.setState({ right: false })
-        this.callApiBlink(RIGHT_PIN, false)
+        this.callApiBlink(RIGHT_PIN, 0)
         break;
       case LEFT_BACK_KEY_CODE:
         this.setState({ left_back: false })
-        this.callApiBlink(LEFT_BACK_PIN, false)
+        this.callApiBlink(LEFT_BACK_PIN, 0)
         break
       case RIGHT_BACK_KEY_CODE:
         this.setState({ right_back: false })
-        this.callApiBlink(RIGHT_BACK_PIN, false)
+        this.callApiBlink(RIGHT_BACK_PIN, 0)
         break
       case ACCELERATE_KEY_CODE:
         this.setState({ accelerate: false })
-        this.callApiBlink(ACCELERATE_PIN, false)
+        this.callApiBlink(ACCELERATE_PIN, 0)
         break
       case ARMOR_KEY_CODE:
         this.setState({ armor: false })
-        this.callApiBlink(ARMOR_PIN, false)
+        this.callApiBlink(ARMOR_PIN, 0)
         break
       case ARMOR_2_KEY_CODE:
         this.setState({ armor_2: false })
-        this.callApiBlink(ARMOR_2_PIN, false)
+        this.callApiBlink(ARMOR_2_PIN, 0)
         break
       default:
         break;
@@ -253,7 +253,7 @@ class Home extends React.Component {
   callApiBlink(pin, value) {
     ++this.step
 
-    let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value ? 1 : 0}&value=${this.control_session_id}&value=${this.step}`
+    let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}`
     let time = Date.now()
     
     this.log()
