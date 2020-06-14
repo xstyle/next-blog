@@ -427,8 +427,10 @@ class Home extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
-          <div className="col-12 col-lg-9 p-0"><video ref={this.myRef} controls autoPlay /></div>
-          <div className="col-12 col-lg-3">
+          <div className="col-12 col-lg-6 p-0">
+            <video ref={this.myRef} controls autoPlay />
+          </div>
+          <div className="col-12 col-lg-6">
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
               <label className="form-check-label">Пуск</label>
