@@ -19,7 +19,7 @@ export async function getServerSideProps(context) {
 export default function Robots(props) {
   return <div className="container">
     <Head>
-      <title>Выбор робота</title>
+      <title>Выберите робота</title>
     </Head>
     <h1>Выберите робота</h1>
     <ul>
