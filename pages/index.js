@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../components/UserVideoComponent'
+import fetch from 'node-fetch'
 
 const WEBRTC_SERVER = 'https://wartec.ddns.net:8000'
 const RTSP_STREAM = 'rtsp://wartec.ddns.net:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream'
@@ -45,9 +46,16 @@ const MOVE_STATES = {
 
 const CONTROL_VIRTUAL_PIN = 'V30'
 
+export async function getServerSideProps(context) {
+  return {
+    props: {}
+  }
+}
+
 class Home extends React.Component {
   constructor(props) {
     super(props)
+    
     this.state = {
       token: props.router.query.token,
       on: false,
@@ -87,10 +95,6 @@ class Home extends React.Component {
 
   control_session_id = Math.round(Date.now() / 1000)
   step = 0
-
-  static getInitialProps({ query }) {
-    return { query }
-  }
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
@@ -255,7 +259,7 @@ class Home extends React.Component {
 
     let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}`
     let time = Date.now()
-    
+
     this.log()
 
     fetch(url)
@@ -438,57 +442,18 @@ class Home extends React.Component {
             <h3>Инструкция</h3>
             <ol>
               <li>Включить Пуск.</li>
-              <li>Управлять кнопками <b>W</b> - вперед влево, <b>S</b> - назад влево, <b>P</b> - вперед вправо, <b>L</b> - назад вправо, <b>Пробел</b> - ускорение, <b>Левый Shift</b> - Доспехи, <b>Enter</b> - Доспехи 2.</li>
-              <li>В логах видно время запроса, код ответа сервера, команда и время выполнения запроса.</li>
-            </ol>
-            <h3>Настройки</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Команда</th>
-                  <th>Key code</th>
-                  <th>Pin</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className={this.state.left ? "active" : ""}>
-                  <td>Влево вперед</td>
-                  <td>{LEFT_FORWARD_KEY_CODE}</td>
-                  <td>{LEFT_PIN}</td>
-                </tr>
-                <tr className={this.state.right ? "active" : ""}>
-                  <td>Вправо вперед</td>
-                  <td>{RIGHT_FORWARD_KEY_CODE}</td>
-                  <td>{RIGHT_PIN}</td>
-                </tr>
-                <tr className={this.state.left_back ? "active" : ""}>
-                  <td>Влево назад</td>
-                  <td>{LEFT_BACK_KEY_CODE}</td>
-                  <td>{LEFT_BACK_PIN}</td>
-                </tr>
-                <tr className={this.state.right_back ? "active" : ""}>
-                  <td>Вправо назад</td>
-                  <td>{RIGHT_BACK_KEY_CODE}</td>
-                  <td>{RIGHT_BACK_PIN}</td>
-                </tr>
-                <tr className={this.state.accelerate ? "active" : ""}>
-                  <td>Ускорение</td>
-                  <td>{ACCELERATE_KEY_CODE}</td>
-                  <td>{ACCELERATE_PIN}</td>
-                </tr>
-                <tr className={this.state.armor ? "active" : ""}>
-                  <td>Доспехи</td>
-                  <td>{ARMOR_KEY_CODE}</td>
-                  <td>{ARMOR_PIN}</td>
-                </tr>
-                <tr className={this.state.armor_2 ? "active" : ""}>
-                  <td>Доспехи 2</td>
-                  <td>{ARMOR_2_KEY_CODE}</td>
-                  <td>{ARMOR_2_PIN}</td>
-                </tr>
-              </tbody>
+              <li>Управление:
+                <ul className="list-unstyled">
+                  <li><kbd>&uarr;</kbd> - вперед</li>
+                  <li><kbd>&darr;</kbd> - назад</li>
+                  <li><kbd>&larr;</kbd> - влево </li>
+                  <li><kbd>&rarr;</kbd> - вправо </li>
+                  <li><kbd>Левый Shift</kbd> - Доспехи</li>
+                  <li><kbd>Enter</kbd> - Доспехи 2</li>
+                </ul>
+              </li>
 
-            </table>
+            </ol>
           </div>
           {this.state.logs.length > 0 && <table className="log">
             <thead>
@@ -776,4 +741,5 @@ class Home extends React.Component {
   }
 
 }
+
 export default withRouter(Home)
