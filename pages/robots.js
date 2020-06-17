@@ -51,10 +51,25 @@ export default function Robots(props) {
 
 function RobotCard({ robot }) {
   return <div className="card">
+    <svg className="bd-placeholder-img card-img-top" width="100%" height="180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Image cap">
+      <title>Placeholder</title>
+      <rect width="100%" height="100%" fill="#868e96"></rect>
+      <text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image cap</text>
+    </svg>
     <div className="card-body text-center">
       <h5 className="card-title">{robot.name}</h5>
-      <p className="card-text">Описание робота</p>
+      <p className="card-text text-muted">{robot.description}</p>
       <a href="#" className="btn btn-primary">Выбрать</a>
     </div>
+    <style jsx>{`
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+    `}</style>
   </div>
 }
