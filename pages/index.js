@@ -3,9 +3,6 @@ import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../components/UserVideoComponent'
 import fetch from 'node-fetch'
 
-const WEBRTC_SERVER = 'https://wartec.ddns.net:8000'
-const RTSP_STREAM = 'rtsp://wartec.ddns.net:551/user=admin_password=on1vqgKU_channel=1_stream=0.sdp?real_stream'
-
 const SESSION_ID = 'WarTec'
 
 const LEFT_PIN = 'D4'
@@ -47,17 +44,47 @@ const MOVE_STATES = {
 const CONTROL_VIRTUAL_PIN = 'V30'
 
 export async function getServerSideProps(context) {
+  const BACKEND_URL = process.env.BACKEND
+  const {
+    RTSP_STREAM,
+    WEBRTC_SERVER,
+    ROBOT_API_SERVER
+  } = process.env
+
+  let robot_game = null
+  const response = await fetch(`${BACKEND_URL}/api/robot_game?code=${context.query.code}&load_robot=1`)
+
+  if (response.status === 200) {
+    const data = await response.json();
+    robot_game = data[0] || null
+  }
+
   return {
-    props: {}
+    props: {
+      robot_game,
+      RTSP_STREAM,
+      WEBRTC_SERVER,
+      ROBOT_API_SERVER
+    }
   }
 }
 
 class Home extends React.Component {
   constructor(props) {
     super(props)
-    
+
+    const { _robot } = props.router.query
+    let token = null
+    if (_robot) {
+      const robot_config = props.robot_game.robots.find(robot_config => robot_config._robot._id === _robot)
+      if (robot_config) {
+        token = robot_config._robot.token
+        this.robot = robot_config._robot;
+      }
+    }
+
     this.state = {
-      token: props.router.query.token,
+      token: token,
       on: false,
       left: false,
       right: false,
@@ -109,8 +136,8 @@ class Home extends React.Component {
 
     require('webrtc-streamer/html/libs/adapter.min');
     const WebRtcStreamer = require('../components/webrtcstreamer.js');
-    this.webRtcServer = new WebRtcStreamer(this.myRef.current, WEBRTC_SERVER);
-    this.webRtcServer.connect(RTSP_STREAM, null, 'rtptransport=tcp&timeout=60');
+    this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER);
+    this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60');
   }
 
   control(state) {
@@ -257,7 +284,7 @@ class Home extends React.Component {
   callApiBlink(pin, value) {
     ++this.step
 
-    let url = `https://wartec.ddns.net/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}`
+    let url = `${this.props.ROBOT_API_SERVER}/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}`
     let time = Date.now()
 
     this.log()
@@ -424,6 +451,12 @@ class Home extends React.Component {
   }
 
   render() {
+    const { robot_game } = this.props
+
+    if (!robot_game || !this.robot) return <div>Кабина управления не доступна. Обратитесь к администратору.</div>
+    if (robot_game.state === 'closed') return <div>Игра закончилась. Спасибо что были с нами!</div>
+    if (robot_game.state === 'initialized') return <div>Игра скоро начнется. Ждем с нетерпением.</div>
+
     return (<>
       <div className="container-fluid">
         <Head>
@@ -435,6 +468,7 @@ class Home extends React.Component {
             <video ref={this.myRef} controls autoPlay />
           </div>
           <div className="col-12 col-lg-6">
+            <h1>{this.robot.name}</h1>
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
               <label className="form-check-label">Пуск</label>

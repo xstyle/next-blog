@@ -1,14 +1,14 @@
 import Head from 'next/head'
 import fetch from 'node-fetch'
-const BACKEND_URL = process.env.BACKEND
 
 export async function getServerSideProps(context) {
-
+  const BACKEND_URL = process.env.BACKEND
   const options = {
     headers: {
       cookie: context.req.headers.cookie
     }
   }
+
   const user_response = await fetch(BACKEND_URL + '/api/auth', options)
   const robot_game_response = await fetch(BACKEND_URL + `/api/robot_game?code=${context.query.code}&load_robot=1`)
 
@@ -23,9 +23,9 @@ export async function getServerSideProps(context) {
 
   if (robot_game_response.status === 200) {
     robot_game = (await robot_game_response.json())[0] || null
-    
+
   }
-  
+
   if (robot_game) {
     robots = robot_game.robots.map(robot => robot._robot)
   }
@@ -40,12 +40,15 @@ export async function getServerSideProps(context) {
 }
 
 export default function Robots(props) {
-  if (!props.robot_game) {
+
+  const { robot_game } = props;
+  if (!robot_game) {
     return <div>Игра не найдена. Свяжитесь с адмнистратором....</div>
   }
-  const show_btn = props.robot_game.state === 'activated'
-  const show_init = props.robot_game.state === 'inited'
-  const show_closed = props.robot_game.state === 'closed'
+
+  const show_btn = robot_game.state === 'activated'
+  const show_init = robot_game.state === 'inited'
+  const show_closed = robot_game.state === 'closed'
 
   return <div className="container">
     <Head>
@@ -54,15 +57,15 @@ export default function Robots(props) {
     <div className="pt-5 pb-3">
       <h1>Выберите робота...</h1>
     </div>
-    
-    <p>Команда: { props.robot_game.name }. Игра забронирована на {props.robot_game.count} человек.</p>
+
+    <p>Команда: {robot_game.name}. Игра забронирована на {robot_game.count} человек.</p>
     {show_init && <p>Игра еще не началась. Что бы быть готовым к битве попробуйте <a href="/wartec/demo">симулятор управления роботом</a></p>}
     {show_closed && <div className="alert alert-danger">Игра закончилась. Ждем вас снова!</div>}
     <div className="row">
       {
         props.robots.map(robot =>
           <div className="col-12 col-lg-4" key={robot._id}>
-            <RobotCard robot={robot} show_btn={show_btn}/>
+            <RobotCard robot={robot} show_btn={show_btn} code={robot_game.code} />
           </div>
         )
       }
@@ -76,7 +79,7 @@ export default function Robots(props) {
   </div>
 }
 
-function RobotCard({ robot, show_btn }) {
+function RobotCard({ robot, show_btn, code }) {
   return <div className="card bg-dark">
     <svg className="bd-placeholder-img card-img-top" width="100%" height="180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Image cap">
       <title>Placeholder</title>
@@ -86,7 +89,7 @@ function RobotCard({ robot, show_btn }) {
     <div className="card-body text-center">
       <h4 className="card-title">{robot.name}</h4>
       <p className="card-text">{robot.description}</p>
-      {show_btn && <a href={robot.url} className="btn btn-primary">Выбрать</a>}
+      {show_btn && <a href={`/?code=${code}&_robot=${robot._id}`} className="btn btn-primary">Выбрать</a>}
     </div>
     <style jsx>{`
       .bd-placeholder-img {
