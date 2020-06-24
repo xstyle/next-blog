@@ -47,6 +47,8 @@ export async function getServerSideProps(context) {
         state: robot_game.state,
         count: robot_game.count,
         code: robot_game.code,
+        date: robot_game.date,
+        time: robot_game.time,
         players_count: robot_game.players.length
       } : null
     }
@@ -57,27 +59,27 @@ export default function Robots(props) {
 
   const { robot_game } = props;
   if (!robot_game) {
-    return <div>Игра не найдена. Свяжитесь с адмнистратором....</div>
+    return <div>Игра не найдена. Свяжитесь с адмнистратором...</div>
   }
 
   const [player_code, setPlayerCode] = useState();
 
   const show_btn = robot_game.state === 'activated' && (player_code || !robot_game.players_count)
-  const show_init = robot_game.state === 'inited'
+  const show_init = robot_game.state === 'initialized'
   const show_closed = robot_game.state === 'closed'
   const show_player_code_form = !!(robot_game.state == 'activated' && robot_game.players_count)
 
-  return <div className="container">
+  return <div className="container pt-5">
     <Head>
       <title>Выберите робота</title>
     </Head>
 
-    <div className="pt-5 pb-3">
-      <h1>Выберите робота...</h1>
+    <div className="pb-3">
+      <h1>{robot_game.name}</h1>
     </div>
 
-    <p>Команда: {robot_game.name}. Игра забронирована на {robot_game.count} человек.</p>
-    {show_init && <p>Игра еще не началась. Что бы быть готовым к битве попробуйте <a href="/wartec/demo">симулятор управления роботом</a></p>}
+    <p>Начало игры {robot_game.date} в {robot_game.time}.</p>
+    {show_init && <p>Роботы будут доступны для выбора за 10 минут до начала игры. А пока вы можете познакомиться с роботами и выбрать каким будете управлять. Чтобы быть готовым к битве попробуйте <a href="/wartec/demo">симулятор управления роботом</a>!</p>}
     {show_closed && <div className="alert alert-danger">Игра закончилась. Ждем вас снова!</div>}
     {show_player_code_form && <form className="form">
       <div className="form-group">
@@ -128,7 +130,7 @@ function RobotCard({ robot, show_btn, code, player_code }) {
       <h4 className="card-title">{robot.name}</h4>
       <p className="card-text">{robot.description}</p>
       {show_btn && <a
-        href={`/?code=${code}&_robot=${robot._id}${player_code ? `&player_code=${player_code}` : ''}`}
+        href={`/wartec/control?code=${code}&_robot=${robot._id}${player_code ? `&player_code=${player_code}` : ''}`}
         className={`btn btn-${robot.is_selected ? 'secondary' : 'primary'}`}>{robot.is_selected ? 'Выбран' : 'Выбрать'}</a>}
     </div>
     <style jsx>{`

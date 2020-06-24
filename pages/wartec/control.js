@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useRouter, withRouter } from 'next/router'
-import UserVideoComponent from '../components/UserVideoComponent'
+import UserVideoComponent from '../../components/UserVideoComponent'
+
 import fetch from 'node-fetch'
 
 const SESSION_ID = 'WarTec'
@@ -45,7 +46,7 @@ const CONTROL_VIRTUAL_PIN = 'V30'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
-  const {TOKEN_KVESTGID} = process.env
+  const { TOKEN_KVESTGID } = process.env
 
   const {
     RTSP_STREAM,
@@ -56,12 +57,12 @@ export async function getServerSideProps(context) {
   let robot_game = null
 
   const {
-    code, 
+    code,
     player_code,
     _robot
   } = context.query
 
-  const response = await fetch(`${BACKEND_URL}/api/robot_game?token=${TOKEN_KVESTGID}&code=${code}&_robot=${_robot}&load_robot=1${player_code ? `&player_code=${player_code}`:''}`)
+  const response = await fetch(`${BACKEND_URL}/api/robot_game?token=${TOKEN_KVESTGID}&code=${code}&_robot=${_robot}&load_robot=1${player_code ? `&player_code=${player_code}` : ''}`)
 
   if (response.status === 200) {
     const data = await response.json()
@@ -145,7 +146,7 @@ class Home extends React.Component {
     this.OpenVidu = require('openvidu-browser').OpenVidu;
 
     require('webrtc-streamer/html/libs/adapter.min');
-    const WebRtcStreamer = require('../components/webrtcstreamer.js');
+    const WebRtcStreamer = require('../../components/webrtcstreamer.js');
     this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER);
     this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60');
   }
@@ -470,14 +471,14 @@ class Home extends React.Component {
     return (<>
       <div className="container-fluid">
         <Head>
-          <title>WarTec - Robots Battle</title>
+          <title>Кабина управления "{ this.robot.name }"</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
           <div className="col-12 col-lg-6 p-0">
             <video ref={this.myRef} controls autoPlay />
           </div>
-          <div className="col-12 col-lg-6">
+          <div className="col-12 col-lg-6 pt-5">
             <h1>{this.robot.name}</h1>
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
@@ -708,7 +709,7 @@ class Home extends React.Component {
             font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
               Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
               sans-serif;
-            background-color: #333;
+            background-color: black;
             color: white;  
           }
 
