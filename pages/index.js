@@ -45,6 +45,8 @@ const CONTROL_VIRTUAL_PIN = 'V30'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
+  const {TOKEN_KVESTGID} = process.env
+
   const {
     RTSP_STREAM,
     WEBRTC_SERVER,
@@ -52,10 +54,17 @@ export async function getServerSideProps(context) {
   } = process.env
 
   let robot_game = null
-  const response = await fetch(`${BACKEND_URL}/api/robot_game?code=${context.query.code}&load_robot=1`)
+
+  const {
+    code, 
+    player_code,
+    _robot
+  } = context.query
+
+  const response = await fetch(`${BACKEND_URL}/api/robot_game?token=${TOKEN_KVESTGID}&code=${code}&_robot=${_robot}&load_robot=1${player_code ? `&player_code=${player_code}`:''}`)
 
   if (response.status === 200) {
-    const data = await response.json();
+    const data = await response.json()
     robot_game = data[0] || null
   }
 
@@ -72,19 +81,18 @@ export async function getServerSideProps(context) {
 class Home extends React.Component {
   constructor(props) {
     super(props)
-
     const { _robot } = props.router.query
     let token = null
-    if (_robot) {
+    if (_robot && props.robot_game) {
       const robot_config = props.robot_game.robots.find(robot_config => robot_config._robot._id === _robot)
       if (robot_config) {
         token = robot_config._robot.token
-        this.robot = robot_config._robot;
+        this.robot = robot_config._robot
       }
     }
 
     this.state = {
-      token: token,
+      token,
       on: false,
       left: false,
       right: false,
@@ -97,6 +105,7 @@ class Home extends React.Component {
       alternative_control: false,
       state: [0, 0, 0, 0]
     }
+
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
     this.handleTokenChange = this.handleTokenChange.bind(this);
@@ -115,6 +124,7 @@ class Home extends React.Component {
       ARROW_LEFT = 'ArrowRight'
       ARROW_RIGHT = 'ArrowLeft'
     }
+
     this.myRef = React.createRef();
   }
 
