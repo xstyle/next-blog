@@ -12,7 +12,7 @@ const RIGHT_PIN = 'D16'
 const LEFT_BACK_PIN = 'D14'
 const RIGHT_BACK_PIN = 'D5'
 
-const ARMOR_PIN = 'D12'
+const ARMOR_PIN = 'V31'
 const ARMOR_2_PIN = 'D13'
 const ACCELERATE_PIN = 'D0'
 
@@ -204,7 +204,7 @@ class Home extends React.Component {
         break
       case ARMOR_2_KEY_CODE:
         this.setState({ armor_2: true })
-        this.callApiBlink(ARMOR_2_PIN, 1)
+        this.callApiBlink(ARMOR_2_PIN, 2)
         break
 
       default:
