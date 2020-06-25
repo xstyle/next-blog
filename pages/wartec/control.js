@@ -295,7 +295,7 @@ class Home extends React.Component {
   callApiBlink(pin, value) {
     ++this.step
 
-    let url = `${this.props.ROBOT_API_SERVER}/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}`
+    let url = `${this.props.ROBOT_API_SERVER}/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}&value=${this.props.robot_game.code}`
     let time = Date.now()
 
     this.log()
