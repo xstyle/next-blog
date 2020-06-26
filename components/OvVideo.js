@@ -21,15 +21,14 @@ export default class OpenViduVideoComponent extends Component {
 
     render() {
         return <>
-        <video autoPlay={true} ref={this.videoRef} />
-    <style jsx>{`
-        video {
-            width: 100%;
-            height: auto;
-            float: left;
-            cursor: pointer;
-        }
-    `}</style>
+            <video autoPlay={true} ref={this.videoRef} />
+            <style jsx>{`
+                video {
+                    width: 100%;
+                    height: auto;
+                    float: left;
+                }
+            `}</style>
         </>;
     }
 

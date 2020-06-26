@@ -46,7 +46,7 @@ const CONTROL_VIRTUAL_PIN = 'V30'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
-  const { 
+  const {
     TOKEN_KVESTGID,
     OPENVIDU_SERVER_URL,
     OPENVIDU_SERVER_SECRET
@@ -84,7 +84,7 @@ export async function getServerSideProps(context) {
       robot_game: robot_game ? {
         name: robot_game.name,
         code: robot_game.code,
-        state:robot_game.state
+        state: robot_game.state
       } : null,
       robot,
       RTSP_STREAM,
@@ -356,7 +356,7 @@ class Home extends React.Component {
         this.getToken().then((token) => {
           mySession
             .connect(token, {
-              clientData: this.state.myUserName
+              clientData: this.props.robot.name
             })
             .then(() => {
               let publisher = this.OV.initPublisher(undefined, {
@@ -477,19 +477,61 @@ class Home extends React.Component {
     return (<>
       <div className="container-fluid">
         <Head>
-          <title>Кабина управления "{ this.props.robot.name }"</title>
+          <title>Кабина управления "{this.props.robot.name}"</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
-          <div className="col-12 col-lg-6 p-0">
+          <div className="col-12 col-lg-8 p-0">
             <video ref={this.myRef} controls autoPlay />
-          </div>
-          <div className="col-12 col-lg-6 pt-5">
             <h1>{this.props.robot.name}</h1>
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
               <label className="form-check-label">Пуск</label>
             </div>
+          </div>
+          <div className="col-12 col-lg-4">
+            {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
+              <form onSubmit={this.joinSession}>
+                <div className="form-group">
+                  <button className="btn btn-success" id='buttonLeaveSession' name="commit" type="submit">
+                    Подключиться к видеоконференции</button>
+                </div>
+              </form>
+            </div>}
+            {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
+              <div id="session">
+                <div id="video-container">
+                  <div className="row">
+                    {this.state.publisher !== undefined ? (
+                      <div className="stream-container col-3 p-0"
+                        onClick={() => this.handleMainVideoStream(this.state.publisher)}>
+                        <UserVideoComponent streamManager={this.state.publisher} />
+                      </div>
+                    ) : null}
+                    {this.state.subscribers.map((sub, i) => (
+                      <div key={i} className="stream-container col-3 p-0" onClick={() => this.handleMainVideoStream(sub)}>
+                        <UserVideoComponent streamManager={sub} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div id="session-header" className="col-12">
+                  <button
+                    className="btn btn-large btn-danger"
+                    type="button"
+                    id="buttonLeaveSession"
+                    onClick={this.leaveSession}>Отключиться</button>
+                </div>
+                {/* {this.state.mainStreamManager !== undefined ? (
+                  <div id="main-video" className="col-md-6 col-12">
+                    <UserVideoComponent streamManager={this.state.mainStreamManager} />
+                  </div>
+                ) : null} */}
+
+              </div>
+            }
+          </div>
+          <div>
             <h3>Инструкция</h3>
             <ol>
               <li>Включить Пуск.</li>
@@ -564,6 +606,9 @@ class Home extends React.Component {
           </table>}
         </div>
         <style jsx>{`
+          h1 {
+            font-size: 2rem;
+          }
           .container {
             min-height: 100vh;
             padding: 0 0.5rem;
@@ -573,8 +618,13 @@ class Home extends React.Component {
           }
           #video-container,
           .video-container {
-            max-width: 640px;
             width: 100%;
+          }
+
+          #buttonLeaveSession {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
           }
 
           table.log {
@@ -723,69 +773,6 @@ class Home extends React.Component {
             box-sizing: border-box;
           }
         `}</style>
-      </div>
-      <div className="container">
-        {!this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL && <div>
-          <h3>Конференция</h3>
-          <form onSubmit={this.joinSession}>
-            <div className="form-group">
-              <label>Участник: </label>
-              <input
-                className="form-control"
-                type="text"
-                id="userName"
-                value={this.state.myUserName}
-                onChange={this.handleChangeUserName}
-                required
-              />
-              <small className="form-text text-muted">Сервер для коференции включается по запросу.</small>
-            </div>
-            <div className="form-group">
-              <button className="btn btn-lg btn-success" name="commit" type="submit" >
-                Подключиться
-                </button>
-            </div>
-          </form>
-        </div>}
-        {this.state.session && this.OPENVIDU_SERVER_SECRET && this.OPENVIDU_SERVER_URL &&
-          <div id="session" className="row" >
-            <div id="session-header" className="col-12">
-              <h2 id="session-title">Комната: {this.sessionId}</h2>
-              <div className="form-group">
-                <button
-                  className="btn btn-large btn-danger"
-                  type="button"
-                  id="buttonLeaveSession"
-                  onClick={this.leaveSession}
-                >
-                  Отключиться
-                  </button>
-              </div>
-            </div>
-            {this.state.mainStreamManager !== undefined ? (
-              <div id="main-video" className="col-md-6 col-12">
-                <UserVideoComponent streamManager={this.state.mainStreamManager} />
-              </div>
-            ) : null}
-            <div id="video-container" className="col-md-6 col-12">
-              <label>Участники: {this.state.subscribers.length + 1}</label>
-              <div className="row">
-                {this.state.publisher !== undefined ? (
-                  <div className="stream-container col-md-6 col-xs-6 col-12"
-                    onClick={() => this.handleMainVideoStream(this.state.publisher)}>
-                    <UserVideoComponent streamManager={this.state.publisher} />
-                  </div>
-                ) : null}
-                {this.state.subscribers.map((sub, i) => (
-                  <div key={i} className="stream-container col-md-6 col-xs-6" onClick={() => this.handleMainVideoStream(sub)}>
-                    <UserVideoComponent streamManager={sub} />
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        }
       </div>
     </>
     )

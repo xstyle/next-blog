@@ -18,19 +18,20 @@ export default class UserVideoComponent extends Component {
                     </div>
                 ) : null}
                 <style jsx>{`
-                .streamcomponent {
-                    position: relative;
-                }
-                .streamcomponent .user-name {
-                    top: 0;
-                    position: absolute;
-                    background: #f8f8f8;
-                    padding-left: 5px;
-                    padding-right: 5px;
-                    color: #777777;
-                    font-weight: bold;
-                    border-bottom-right-radius: 4px;
-                }
+                    .streamcomponent {
+                        position: relative;
+                    }
+                    .streamcomponent .user-name {
+                        top: 0;
+                        position: absolute;
+                        background: rgba(255,255,255, 0.2);
+                        padding-left: 5px;
+                        padding-right: 5px;
+                        color: white;
+                        font-weight: bold;
+                        border-bottom-right-radius: 4px;
+                        font-size: 9px;
+                    }
                 `}
                 </style>
             </div>
