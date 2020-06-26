@@ -46,7 +46,11 @@ const CONTROL_VIRTUAL_PIN = 'V30'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
-  const { TOKEN_KVESTGID } = process.env
+  const { 
+    TOKEN_KVESTGID,
+    OPENVIDU_SERVER_URL,
+    OPENVIDU_SERVER_SECRET
+  } = process.env
 
   const {
     RTSP_STREAM,
@@ -64,17 +68,30 @@ export async function getServerSideProps(context) {
 
   const response = await fetch(`${BACKEND_URL}/api/robot_game?token=${TOKEN_KVESTGID}&code=${code}&_robot=${_robot}&load_robot=1${player_code ? `&player_code=${player_code}` : ''}`)
 
+  let robot = null
   if (response.status === 200) {
     const data = await response.json()
     robot_game = data[0] || null
   }
-
+  if (_robot && robot_game) {
+    const robot_config = robot_game.robots.find(robot_config => robot_config._robot._id === _robot)
+    if (robot_config) {
+      robot = robot_config._robot
+    }
+  }
   return {
     props: {
-      robot_game,
+      robot_game: robot_game ? {
+        name: robot_game.name,
+        code: robot_game.code,
+        state:robot_game.state
+      } : null,
+      robot,
       RTSP_STREAM,
       WEBRTC_SERVER,
-      ROBOT_API_SERVER
+      ROBOT_API_SERVER,
+      OPENVIDU_SERVER_SECRET: robot_game.conference_is_enable ? OPENVIDU_SERVER_SECRET : null,
+      OPENVIDU_SERVER_URL: robot_game.conference_is_enable ? OPENVIDU_SERVER_URL : null
     }
   }
 }
@@ -82,18 +99,9 @@ export async function getServerSideProps(context) {
 class Home extends React.Component {
   constructor(props) {
     super(props)
-    const { _robot } = props.router.query
-    let token = null
-    if (_robot && props.robot_game) {
-      const robot_config = props.robot_game.robots.find(robot_config => robot_config._robot._id === _robot)
-      if (robot_config) {
-        token = robot_config._robot.token
-        this.robot = robot_config._robot
-      }
-    }
 
     this.state = {
-      token,
+      token: props.robot ? props.robot.token : '',
       on: false,
       left: false,
       right: false,
@@ -111,15 +119,13 @@ class Home extends React.Component {
     this.onKeyUp = this.onKeyUp.bind(this);
     this.handleTokenChange = this.handleTokenChange.bind(this);
     this.handleChangeOn = this.handleChangeOn.bind(this);
-
-    this.OPENVIDU_SERVER_SECRET = props.router.query.OPENVIDU_SERVER_SECRET;
-    this.OPENVIDU_SERVER_URL = props.router.query.OPENVIDU_SERVER_URL;
-    this.IP_CAMERA_RTSP_URL = props.router.query.IP_CAMERA_RTSP_URL;
-
     this.createSession = this.createSession.bind(this);
     this.joinSession = this.joinSession.bind(this);
     this.leaveSession = this.leaveSession.bind(this);
     this.handleChangeUserName = this.handleChangeUserName.bind(this);
+
+    this.OPENVIDU_SERVER_SECRET = props.OPENVIDU_SERVER_SECRET;
+    this.OPENVIDU_SERVER_URL = props.OPENVIDU_SERVER_URL;
 
     if (props.router.query.invert) {
       ARROW_LEFT = 'ArrowRight'
@@ -132,7 +138,7 @@ class Home extends React.Component {
   sessionId = SESSION_ID
 
   control_session_id = Math.round(Date.now() / 1000)
-  step = 0
+  step = 1
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
@@ -464,14 +470,14 @@ class Home extends React.Component {
   render() {
     const { robot_game } = this.props
 
-    if (!robot_game || !this.robot) return <div>Кабина управления не доступна. Обратитесь к администратору.</div>
+    if (!robot_game || !this.props.robot) return <div>Кабина управления не доступна. Обратитесь к администратору.</div>
     if (robot_game.state === 'closed') return <div>Игра закончилась. Спасибо что были с нами!</div>
     if (robot_game.state === 'initialized') return <div>Игра скоро начнется. Ждем с нетерпением.</div>
 
     return (<>
       <div className="container-fluid">
         <Head>
-          <title>Кабина управления "{ this.robot.name }"</title>
+          <title>Кабина управления "{ this.props.robot.name }"</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
@@ -479,7 +485,7 @@ class Home extends React.Component {
             <video ref={this.myRef} controls autoPlay />
           </div>
           <div className="col-12 col-lg-6 pt-5">
-            <h1>{this.robot.name}</h1>
+            <h1>{this.props.robot.name}</h1>
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
               <label className="form-check-label">Пуск</label>
