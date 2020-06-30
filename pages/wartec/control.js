@@ -112,7 +112,8 @@ class Home extends React.Component {
       subscribers: [],
       myUserName: 'Робот ' + Math.floor(Math.random() * 100),
       alternative_control: false,
-      state: [0, 0, 0, 0]
+      state: [0, 0, 0, 0],
+      timer: 0
     }
 
     this.onKeyDown = this.onKeyDown.bind(this);
@@ -133,6 +134,9 @@ class Home extends React.Component {
     }
 
     this.myRef = React.createRef();
+    setInterval(()=> {
+      this.setState({timer: Date.now()})
+    }, 10)
   }
 
   sessionId = SESSION_ID
@@ -483,6 +487,7 @@ class Home extends React.Component {
         <div className="row">
           <div className="col-12 col-lg-8 p-0">
             <video ref={this.myRef} controls autoPlay />
+            <div>{this.state.timer}</div>
             <h1>{this.props.robot.name}</h1>
             <div className="form-check">
               <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
