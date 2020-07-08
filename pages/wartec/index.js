@@ -5,13 +5,14 @@ import { useState } from 'react'
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
   const { TOKEN_KVESTGID } = process.env
+  const { code } = context.query
 
-  const robot_game_response = await fetch(BACKEND_URL + `/api/robot_game?code=${context.query.code}&load_robot=1&token=${TOKEN_KVESTGID}`)
+  const robot_game_response = await fetch(BACKEND_URL + `/api/robot_game?code=${code}&load_robot=1&token=${TOKEN_KVESTGID}`)
 
   let robots = []
   let robot_game = null
 
-  if (robot_game_response.status === 200) {
+  if (robot_game_response.status === 200 && code) {
     robot_game = (await robot_game_response.json())[0] || null
   }
 
