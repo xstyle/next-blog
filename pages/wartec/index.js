@@ -4,29 +4,15 @@ import { useState } from 'react'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
-  const {TOKEN_KVESTGID} = process.env
+  const { TOKEN_KVESTGID } = process.env
 
-  const options = {
-    headers: {
-      cookie: context.req.headers.cookie
-    }
-  }
-
-  const user_response = await fetch(BACKEND_URL + '/api/auth', options)
   const robot_game_response = await fetch(BACKEND_URL + `/api/robot_game?code=${context.query.code}&load_robot=1&token=${TOKEN_KVESTGID}`)
 
   let robots = []
-  let user = {}
   let robot_game = null
-
-
-  if (user_response.status === 200) {
-    user = await user_response.json()
-  }
 
   if (robot_game_response.status === 200) {
     robot_game = (await robot_game_response.json())[0] || null
-
   }
 
   if (robot_game) {
@@ -41,7 +27,6 @@ export async function getServerSideProps(context) {
   return {
     props: {
       robots,
-      user,
       robot_game: robot_game ? {
         name: robot_game.name,
         state: robot_game.state,
