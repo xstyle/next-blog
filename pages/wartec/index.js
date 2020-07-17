@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import fetch from 'node-fetch'
 import { useState } from 'react'
+import { RobotCard } from '../../components/RobotCard'
 
 export async function getServerSideProps(context) {
   const BACKEND_URL = process.env.BACKEND
@@ -93,40 +94,6 @@ export default function Robots(props) {
       body {
         color: white;
         background-color: black;
-      }
-    `}</style>
-  </div>
-}
-
-function RobotCard({ robot, show_btn, code, player_code }) {
-  return <div className="card bg-dark">
-    <svg
-      className="bd-placeholder-img card-img-top"
-      width="100%" height="180"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid slice"
-      focusable="false"
-      role="img"
-      aria-label="Placeholder: Image cap">
-      <title>Placeholder</title>
-      <rect width="100%" height="100%" fill="#868e96"></rect>
-      <text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image cap</text>
-    </svg>
-    <div className="card-body text-center">
-      <h4 className="card-title">{robot.name}</h4>
-      <p className="card-text">{robot.description}</p>
-      {show_btn && <a
-        href={`/wartec/control?code=${code}&_robot=${robot._id}${player_code ? `&player_code=${player_code}` : ''}`}
-        className={`btn btn-${robot.is_selected ? 'secondary' : 'primary'}`}>{robot.is_selected ? 'Выбран' : 'Выбрать'}</a>}
-    </div>
-    <style jsx>{`
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
       }
     `}</style>
   </div>
