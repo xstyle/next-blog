@@ -261,7 +261,7 @@ class Home extends React.Component {
     let interval = this.last_request - time
     this.last_request = time
 
-    console.log('Time last request', interval)
+    //console.log('Time last request', interval)
   }
 
   callApiBlink(pin, value) {
@@ -274,7 +274,6 @@ class Home extends React.Component {
 
     fetch(url)
       .then(response => {
-        console.log(response.status)
         const logs = [
           ...this.state.logs,
           {
