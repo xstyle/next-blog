@@ -176,7 +176,7 @@ class Home extends React.Component {
   onKeyDown(event) {
     if (!this.state.on) return
     event.preventDefault()
-    if (event.repeat) return
+    if (event.repeat) return this.log();
     console.log(`Нажата ${event.code}`)
     switch (event.code) {
       case ARROW_UP:
