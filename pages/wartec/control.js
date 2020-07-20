@@ -3,7 +3,6 @@ import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../../components/UserVideoComponent'
 
 import fetch from 'node-fetch'
-import next from 'next'
 
 const SESSION_ID = 'WarTec'
 
@@ -41,6 +40,13 @@ const MOVE_STATES = {
   '0010': 6,
   '1001': 7,
   '1000': 8
+}
+
+const BUTTON_STATE_CHANGE = {
+  [ARROW_UP]: [1, 1, -1, -1],
+  [ARROW_LEFT]: [-1, 1, 1, -1],
+  [ARROW_DOWN]: [-1, -1, 1, 1],
+  [ARROW_RIGHT]: [1, -1, -1, 1]
 }
 
 const CONTROL_VIRTUAL_PIN = 'V30'
@@ -163,33 +169,53 @@ class Home extends React.Component {
     this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60&width=1280&height=720');
   }
 
-  control(state) {
-    const prev_state = this.move_state;
-    const next_state = prev_state.map((value, index) => state[index] + value)
-    this.move_state = next_state;
+  buttons = {
+    ARROW_UP: false,
+    ARROW_LEFT: false,
+    ARROW_DOWN: false,
+    ARROW_RIGHT: false
+  }
 
-    const move_state = next_state.map(item => item > 0 ? 1 : 0).join('');
-    console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}. Был ${prev_state}, изменение ${state}, стало ${next_state}`)
-    this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
+  control(button, state) {
+    if (state && this.buttons[button]) window.alert('Ошибка! Кнопка не может быть нажата повторно.')
+    if (!state && !this.buttons[button]) window.alert('Ошибка! Кнопка не может быть отпущенна повторно.')
+
+    this.buttons[button] = state
+    const next_state = [
+      ARROW_UP,
+      ARROW_LEFT,
+      ARROW_DOWN,
+      ARROW_RIGHT
+    ].reduce(
+      (state, button) =>
+        state.map((value, index) =>
+          value + BUTTON_STATE_CHANGE[button][index] * (this.buttons[button] ? 1 : -1)
+        )
+      , [0, 0, 0, 0]
+    )
+
+    const move_state = next_state.map(item => item > 0 ? 1 : 0).join('')
+    console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}. Cтало ${next_state}`)
+    this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state])
   }
 
   onKeyDown(event) {
     if (!this.state.on) return
     event.preventDefault()
-    if (event.repeat) return this.log();
+    if (event.repeat) return// this.log();
     console.log(`Нажата ${event.code}`)
     switch (event.code) {
       case ARROW_UP:
-        this.control([1, 1, -1, -1]);
+        this.control(ARROW_UP, true);
         break;
       case ARROW_LEFT:
-        this.control([-1, 1, 1, -1]);
+        this.control(ARROW_LEFT, true);
         break;
       case ARROW_DOWN:
-        this.control([-1, -1, 1, 1]);
+        this.control(ARROW_DOWN, true);
         break;
       case ARROW_RIGHT:
-        this.control([1, -1, -1, 1]);
+        this.control(ARROW_RIGHT, true);
         break;
       case ARMOR_KEY_CODE:
         this.setState({ armor: true })
@@ -228,21 +254,21 @@ class Home extends React.Component {
   }
 
   onKeyUp(event) {
-    console.log(`Отжата ${event.code} true? ${this.state.on}`)
+    console.log(`Отжата ${event.code}`)
     if (!this.state.on) return;
-    
+
     switch (event.code) {
       case ARROW_UP:
-        this.control([-1, -1, 1, 1]);
+        this.control(ARROW_UP, false);
         break;
       case ARROW_LEFT:
-        this.control([1, -1, -1, 1]);
+        this.control(ARROW_LEFT, false);
         break;
       case ARROW_DOWN:
-        this.control([1, 1, -1, -1]);
+        this.control(ARROW_DOWN, false);
         break;
       case ARROW_RIGHT:
-        this.control([-1, 1, 1, -1]);
+        this.control(ARROW_RIGHT, false);
         break;
       case ARMOR_KEY_CODE:
         this.setState({ armor: false })
@@ -272,7 +298,7 @@ class Home extends React.Component {
     let url = `${this.props.ROBOT_API_SERVER}/${this.state.token}/update/${pin}?value=${value}&value=${this.control_session_id}&value=${this.step}&value=${this.props.robot_game.code}`
     let time = Date.now()
 
-    this.log()
+    // this.log()
 
     fetch(url)
       .then(response => {
