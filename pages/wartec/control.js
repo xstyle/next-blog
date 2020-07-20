@@ -144,6 +144,7 @@ class Home extends React.Component {
 
   control_session_id = Math.round(Date.now() / 1000)
   step = 1
+  move_state = [0,0,0,0]
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
@@ -163,11 +164,10 @@ class Home extends React.Component {
   }
 
   control(state) {
-    const prev_state = this.state.state;
+    const prev_state = this.move_state;
     const next_state = prev_state.map((value, index) => state[index] + value)
-    this.setState({
-      state: next_state
-    });
+    this.move_state = next_state;
+
     const move_state = next_state.map(item => item > 0 ? 1 : 0).join('');
     console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}`)
     this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
@@ -262,7 +262,7 @@ class Home extends React.Component {
     let interval = this.last_request - time
     this.last_request = time
 
-    //console.log('Time last request', interval)
+    console.log('Время с последнего запроса', interval)
   }
 
   callApiBlink(pin, value) {
