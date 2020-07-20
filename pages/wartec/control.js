@@ -176,6 +176,7 @@ class Home extends React.Component {
     if (!this.state.on) return
     event.preventDefault()
     if (event.repeat) return
+    console.log(`Нажата ${event.code}`)
     switch (event.code) {
       case ARROW_UP:
         this.control([1, 1, -1, -1]);
@@ -227,7 +228,7 @@ class Home extends React.Component {
 
   onKeyUp(event) {
     if (!this.state.on) return;
-
+    console.log(`Отжата ${event.code}`)
     switch (event.code) {
       case ARROW_UP:
         this.control([-1, -1, 1, 1]);
