@@ -158,7 +158,7 @@ class Home extends React.Component {
     require('webrtc-streamer/html/libs/adapter.min');
     const WebRtcStreamer = require('../../components/webrtcstreamer.js');
     this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER);
-    this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60');
+    this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60&width=1280&height=720');
   }
 
   control(state) {
