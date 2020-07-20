@@ -135,8 +135,8 @@ class Home extends React.Component {
     }
 
     this.myRef = React.createRef();
-    setInterval(()=> {
-      this.setState({timer: Date.now()})
+    setInterval(() => {
+      this.setState({ timer: Date.now() })
     }, 100)
   }
 
@@ -144,7 +144,7 @@ class Home extends React.Component {
 
   control_session_id = Math.round(Date.now() / 1000)
   step = 1
-  move_state = [0,0,0,0]
+  move_state = [0, 0, 0, 0]
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
