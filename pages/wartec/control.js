@@ -169,6 +169,7 @@ class Home extends React.Component {
       state: next_state
     });
     const move_state = next_state.map(item => item > 0 ? 1 : 0).join('');
+    console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}`)
     this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
   }
 
