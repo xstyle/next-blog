@@ -135,9 +135,9 @@ class Home extends React.Component {
     }
 
     this.myRef = React.createRef();
-    setInterval(() => {
-      this.setState({ timer: Date.now() })
-    }, 100)
+    // setInterval(() => {
+    //   this.setState({ timer: Date.now() })
+    // }, 100)
   }
 
   sessionId = SESSION_ID
