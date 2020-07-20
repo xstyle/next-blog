@@ -228,8 +228,9 @@ class Home extends React.Component {
   }
 
   onKeyUp(event) {
+    console.log(`Отжата ${event.code} true? ${this.state.on}`)
     if (!this.state.on) return;
-    console.log(`Отжата ${event.code}`)
+    
     switch (event.code) {
       case ARROW_UP:
         this.control([-1, -1, 1, 1]);
