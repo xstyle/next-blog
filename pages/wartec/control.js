@@ -3,6 +3,7 @@ import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../../components/UserVideoComponent'
 
 import fetch from 'node-fetch'
+import next from 'next'
 
 const SESSION_ID = 'WarTec'
 
@@ -163,12 +164,12 @@ class Home extends React.Component {
 
   control(state) {
     const prev_state = this.state.state;
+    const next_state = prev_state.map((value, index) => state[index] + value)
     this.setState({
-      state: prev_state.map((value, index) => state[index] + value)
-    }, () => {
-      const move_state = this.state.state.map(item => item > 0 ? 1 : 0).join('');
-      this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
+      state: next_state
     });
+    const move_state = next_state.map(item => item > 0 ? 1 : 0).join('');
+    this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state]);
   }
 
   onKeyDown(event) {
