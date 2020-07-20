@@ -141,9 +141,9 @@ class Home extends React.Component {
     }
 
     this.myRef = React.createRef();
-    // setInterval(() => {
-    //   this.setState({ timer: Date.now() })
-    // }, 100)
+    setInterval(() => {
+      this.setState({ timer: Date.now() })
+    }, 50)
   }
 
   sessionId = SESSION_ID
@@ -170,17 +170,18 @@ class Home extends React.Component {
   }
 
   buttons = {
-    ARROW_UP: false,
-    ARROW_LEFT: false,
-    ARROW_DOWN: false,
-    ARROW_RIGHT: false
+    [ARROW_UP]: { state: false },
+    [ARROW_LEFT]: { state: false },
+    [ARROW_DOWN]: { state: false },
+    [ARROW_RIGHT]: { state: false },
   }
 
-  control(button, state) {
-    if (state && this.buttons[button]) window.alert('Ошибка! Кнопка не может быть нажата повторно.')
-    if (!state && !this.buttons[button]) window.alert('Ошибка! Кнопка не может быть отпущенна повторно.')
+  control(button, state, comment) {
+    if (state && this.buttons[button].state) window.alert('Ошибка! Кнопка не может быть нажата повторно. ' + comment)
+    if (!state && !this.buttons[button].state) window.alert('Ошибка! Кнопка не может быть отпущенна повторно.')
 
-    this.buttons[button] = state
+    this.buttons[button].state = state
+
     const next_state = [
       ARROW_UP,
       ARROW_LEFT,
@@ -189,20 +190,23 @@ class Home extends React.Component {
     ].reduce(
       (state, button) =>
         state.map((value, index) =>
-          value + BUTTON_STATE_CHANGE[button][index] * (this.buttons[button] ? 1 : -1)
+          value + BUTTON_STATE_CHANGE[button][index] * (this.buttons[button].state ? 1 : -1)
         )
       , [0, 0, 0, 0]
     )
 
     const move_state = next_state.map(item => item > 0 ? 1 : 0).join('')
-    console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}. Cтало ${next_state}`)
+    console.log(`Отправляю запрос ${MOVE_STATES[move_state]} ${move_state}. Cтало ${next_state} ${comment}`)
     this.callApiBlink(CONTROL_VIRTUAL_PIN, MOVE_STATES[move_state])
   }
 
   onKeyDown(event) {
     if (!this.state.on) return
     event.preventDefault()
-    if (event.repeat) return// this.log();
+    this.log()
+    if (event.repeat) {
+      return
+    }
     console.log(`Нажата ${event.code}`)
     switch (event.code) {
       case ARROW_UP:
@@ -461,11 +465,12 @@ class Home extends React.Component {
   }
 
   render() {
-    const { robot_game } = this.props
 
+    const { robot_game } = this.props
     if (!robot_game || !this.props.robot) return <div>Кабина управления не доступна. Обратитесь к администратору.</div>
     if (robot_game.state === 'closed') return <div>Игра закончилась. Спасибо что были с нами!</div>
     if (robot_game.state === 'initialized') return <div>Игра скоро начнется. Ждем с нетерпением.</div>
+    const timer = this.state.timer.toString().slice(-4)
 
     return (<>
       <div className="container-fluid">
@@ -476,10 +481,13 @@ class Home extends React.Component {
         <div className="row">
           <div className="col-12 col-lg-8 p-0">
             <video ref={this.myRef} controls autoPlay />
-            <div>{this.state.timer}</div>
+            <div>{timer.slice(0, 1)} {timer.slice(-3)}</div>
             <h1>{this.props.robot.name}</h1>
             <div className="form-check">
-              <input type="checkbox" className="form-check-input" checked={this.state.on} onChange={this.handleChangeOn} />
+              <input type="checkbox"
+                className="form-check-input"
+                checked={this.state.on}
+                onChange={this.handleChangeOn} />
               <label className="form-check-label">Пуск</label>
             </div>
           </div>
