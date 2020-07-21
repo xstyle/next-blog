@@ -177,8 +177,8 @@ class Home extends React.Component {
   }
 
   control(button, state, comment) {
-    if (state && this.buttons[button].state) window.alert('Ошибка! Кнопка не может быть нажата повторно. ' + comment)
-    if (!state && !this.buttons[button].state) window.alert('Ошибка! Кнопка не может быть отпущенна повторно.')
+    if (state && this.buttons[button].state) return
+    if (!state && !this.buttons[button].state) return
 
     this.buttons[button].state = state
 
