@@ -6,22 +6,8 @@ import fetch from 'node-fetch'
 
 const SESSION_ID = 'WarTec'
 
-const LEFT_PIN = 'D4'
-const RIGHT_PIN = 'D16'
-
-const LEFT_BACK_PIN = 'D14'
-const RIGHT_BACK_PIN = 'D5'
-
 const ARMOR_PIN = 'V31'
-const ARMOR_2_PIN = 'D13'
-const ACCELERATE_PIN = 'D0'
 
-const LEFT_FORWARD_KEY_CODE = "KeyW"
-const RIGHT_FORWARD_KEY_CODE = "KeyP"
-
-const LEFT_BACK_KEY_CODE = "KeyS"
-const RIGHT_BACK_KEY_CODE = "KeyL"
-const ACCELERATE_KEY_CODE = "Space"
 const ARMOR_KEY_CODE = "Enter"
 const ARMOR_2_KEY_CODE = "ShiftLeft"
 
@@ -227,9 +213,8 @@ class Home extends React.Component {
         break
       case ARMOR_2_KEY_CODE:
         this.setState({ armor_2: true })
-        this.callApiBlink(ARMOR_2_PIN, 2)
+        this.callApiBlink(ARMOR_PIN, 2)
         break
-
       default:
         break
     }
@@ -280,7 +265,7 @@ class Home extends React.Component {
         break
       case ARMOR_2_KEY_CODE:
         this.setState({ armor_2: false })
-        this.callApiBlink(ARMOR_2_PIN, 0)
+        this.callApiBlink(ARMOR_PIN, 0)
         break
       default:
         break;
