@@ -3,6 +3,7 @@ import { useRouter, withRouter } from 'next/router'
 import UserVideoComponent from '../../components/UserVideoComponent'
 
 import fetch from 'node-fetch'
+import RtstpVideo from '../../components/RtspVideo'
 
 const SESSION_ID = 'WarTec'
 
@@ -145,17 +146,24 @@ class Home extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('beforeunload', this.onbeforeunload);
-    window.addEventListener('keydown', this.onKeyDown);
-    window.addEventListener('keyup', this.onKeyUp);
-    this.OpenVidu = require('openvidu-browser').OpenVidu;
+    window.addEventListener('beforeunload', this.onbeforeunload)
+    window.addEventListener('keydown', this.onKeyDown)
+    window.addEventListener('keyup', this.onKeyUp)
+    this.OpenVidu = require('openvidu-browser').OpenVidu
 
-    require('webrtc-streamer/html/libs/adapter.min');
-    const WebRtcStreamer = require('../../components/webrtcstreamer.js');
-    this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER);
+    require('webrtc-streamer/html/libs/adapter.min')
+    const WebRtcStreamer = require('../../components/webrtcstreamer.js')
+    this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER)
+    this.connect()
+  }
 
-    const rtsp_url = this.props.robot_game.cameras.length ? this.props.robot_game.cameras[0].url : this.props.RTSP_STREAM
-    this.webRtcServer.connect(rtsp_url, null, 'rtptransport=tcp&timeout=60&width=1280&height=720');
+  connect(index = 0) {
+    let rtsp_url = this.props.RTSP_STREAM
+    if (index < this.props.robot_game.cameras.length) {
+      rtsp_url = this.props.robot_game.cameras[index].url
+    }
+
+    this.webRtcServer.connect(rtsp_url, null, 'rtptransport=tcp&timeout=60')
   }
 
   buttons = {
@@ -218,6 +226,13 @@ class Home extends React.Component {
         this.setState({ armor_2: true })
         this.callApiBlink(ARMOR_PIN, 2)
         break
+      case 'Digit1':
+        this.connect(0)
+        break
+      case 'Digit2':
+        this.connect(1)
+        break  
+
       default:
         break
     }
@@ -469,6 +484,15 @@ class Home extends React.Component {
         <div className="row">
           <div className="col-12 col-lg-8 p-0">
             <video ref={this.myRef} controls autoPlay />
+            <div className="row">
+              {
+                this.props.robot_game.cameras.map((camera, index) => {
+                  return <div key={index} className="col-2">
+                    <RtstpVideo src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER}/>
+                  </div>
+                })
+              }
+            </div>
             <div>{timer.slice(0, 1)} {timer.slice(-3)}</div>
             <h1>{this.props.robot.name}</h1>
             <div className="form-check">
@@ -531,8 +555,9 @@ class Home extends React.Component {
                   <li><kbd>&darr;</kbd> - назад</li>
                   <li><kbd>&larr;</kbd> - влево </li>
                   <li><kbd>&rarr;</kbd> - вправо </li>
-                  <li><kbd>Левый Shift</kbd> - Доспехи</li>
-                  <li><kbd>Enter</kbd> - Доспехи 2</li>
+                  <li><kbd>Левый Shift</kbd> - Cнаряжение</li>
+                  <li><kbd>Enter</kbd> - Сняряжение 2</li>
+                  <li><kbd>1</kbd>, <kbd>2</kbd> - переключение между камерами</li>
                 </ul>
               </li>
 
