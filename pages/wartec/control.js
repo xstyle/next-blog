@@ -152,9 +152,9 @@ class Home extends React.Component {
     this.OpenVidu = require('openvidu-browser').OpenVidu
 
     require('webrtc-streamer/html/libs/adapter.min')
-    const WebRtcStreamer = require('../../components/webrtcstreamer.js')
-    this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER)
-    this.connect()
+    // const WebRtcStreamer = require('../../components/webrtcstreamer.js')
+    // this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER)
+    // this.connect()
   }
 
   connect(index = 0) {
@@ -482,8 +482,16 @@ class Home extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
+          <div className="col-6"  style={{padding: 0}}>
+            <RtstpVideo src={robot_game.cameras[0].url}  WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720"/>
+          </div>
+          <div className="col-6" style={{padding: 0}}>
+            <RtstpVideo src={robot_game.cameras[1].url}  WEBRTC_SERVER={this.props.WEBRTC_SERVER}  width="1280" height="720"/>
+          </div>
+        </div>
+        <div className="row">
           <div className="col-12 col-lg-8 p-0">
-            <video ref={this.myRef} controls autoPlay />
+            {/* <video ref={this.myRef} controls autoPlay /> */}
             <div className="row">
               {
                 this.props.robot_game.cameras.map((camera, index) => {

@@ -8,14 +8,14 @@ export default function RtstpVideo(props) {
         console.log('use effect work!' + JSON.stringify(props))
         const streamer = new WebRtcStreamer(ref.current, props.WEBRTC_SERVER)
         setWebRtcStreamer(streamer)
-        streamer.connect(props.src, null, `rtptransport=tcp&timeout=60&width=${props.width | 320 }&height=${props.heigth | 240}`)
+        streamer.connect(props.src, null, `rtptransport=tcp&timeout=60&width=${props.width | 320 }&height=${props.height | 240}`)
     }, [props.src, props.WEBRTC_SERVER])
 
     return <>
-        <video ref={ref} controls autoPlay />
+        <video ref={ref} autoPlay />
         <style jsx>{`
             video {
-                width: 100%;
+                max-width: 100%;
             }
         `}</style>
     </>
