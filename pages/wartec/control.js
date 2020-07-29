@@ -9,7 +9,7 @@ const SESSION_ID = 'WarTec'
 
 const ARMOR_PIN = 'V31'
 
-const ARMOR_KEY_CODE = "Enter"
+const ARMOR_KEY_CODE = "ControlLeft"
 const ARMOR_2_KEY_CODE = "ShiftLeft"
 
 let ARROW_LEFT = 'ArrowLeft'
@@ -556,7 +556,7 @@ class Home extends React.Component {
                   <li><kbd>&larr;</kbd> - влево </li>
                   <li><kbd>&rarr;</kbd> - вправо </li>
                   <li><kbd>Левый Shift</kbd> - Cнаряжение</li>
-                  <li><kbd>Enter</kbd> - Сняряжение 2</li>
+                  <li><kbd>Левый Control</kbd> - Сняряжение 2</li>
                   <li><kbd>1</kbd>, <kbd>2</kbd> - переключение между камерами</li>
                 </ul>
               </li>
