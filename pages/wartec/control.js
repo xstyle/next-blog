@@ -77,7 +77,8 @@ export async function getServerSideProps(context) {
       robot_game: robot_game ? {
         name: robot_game.name,
         code: robot_game.code,
-        state: robot_game.state
+        state: robot_game.state,
+        cameras: robot_game.cameras,
       } : null,
       robot,
       RTSP_STREAM,
@@ -152,7 +153,9 @@ class Home extends React.Component {
     require('webrtc-streamer/html/libs/adapter.min');
     const WebRtcStreamer = require('../../components/webrtcstreamer.js');
     this.webRtcServer = new WebRtcStreamer(this.myRef.current, this.props.WEBRTC_SERVER);
-    this.webRtcServer.connect(this.props.RTSP_STREAM, null, 'rtptransport=tcp&timeout=60&width=1280&height=720');
+
+    const rtsp_url = this.props.robot_game.cameras.length ? this.props.robot_game.cameras[0].url : this.props.RTSP_STREAM
+    this.webRtcServer.connect(rtsp_url, null, 'rtptransport=tcp&timeout=60&width=1280&height=720');
   }
 
   buttons = {
