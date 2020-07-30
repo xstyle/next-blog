@@ -18,6 +18,7 @@ export default function RtstpVideo(props) {
         <style jsx>{`
             video {
                 width: 100%;
+                max-height: 100vh;
             }
         `}</style>
     </>
