@@ -470,8 +470,8 @@ class Home extends React.Component {
     if (robot_game.state === 'closed') return <div>Игра закончилась. Спасибо что были с нами!</div>
     if (robot_game.state === 'initialized') return <div>Игра скоро начнется. Ждем с нетерпением.</div>
     const timer = this.state.timer.toString().slice(-4)
-    
-    let cameras  = robot_game.cameras
+
+    let cameras = robot_game.cameras
 
     if (this.mainRtspStream > 0) {
       cameras = [...cameras, ...cameras.slice(0, this.mainRtspStream)]
@@ -490,7 +490,11 @@ class Home extends React.Component {
             <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
           </div>
           <div className="col-2" style={{ padding: 0 }}>
-            <RtstpVideo src={cameras[1].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280"  height="720" controls />
+            {
+              cameras.slice(1, 10).map((camera, index) => {
+                <RtstpVideo key={index} src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
+              })
+            }
           </div>
         </div>
         <div className="row">
