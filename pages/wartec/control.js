@@ -229,7 +229,15 @@ class Home extends React.Component {
       case 'Digit2':
         this.connect(1)
         break
-
+      case 'Digit3':
+        this.connect(2)
+        break
+      case 'Digit4':
+        this.connect(3)
+        break
+      case 'Digit5':
+        this.connect(4)
+        break
       default:
         break
     }
@@ -485,18 +493,22 @@ class Home extends React.Component {
           <title>Кабина управления "{this.props.robot.name}"</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className="row">
-          <div className="col-10" style={{ padding: 0 }}>
-            <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
-          </div>
-          <div className="col-2" style={{ padding: 0 }}>
-            {
-              cameras.slice(1, 10).map((camera, index) => {
-                <RtstpVideo key={index} src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
-              })
-            }
+        <div style={{ height: "100vh", alignItems: "center", display: "flex" }}>
+          <div className="row"  >
+            <div className="col-9" style={{ padding: 0 }}>
+              <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
+            </div>
+            <div className="col-3" style={{ padding: 0, alignItems: "top" }}>
+              {
+                cameras.slice(1).map((camera, index) => {
+                  return <RtstpVideo key={index} src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
+                })
+              }
+            </div>
           </div>
         </div>
+
+
         <div className="row">
           <div className="col-12 col-lg-8 p-0">
             {/* <video ref={this.myRef} controls autoPlay /> */}
