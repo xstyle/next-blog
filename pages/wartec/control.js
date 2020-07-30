@@ -487,10 +487,10 @@ class Home extends React.Component {
         </Head>
         <div className="row">
           <div className="col-10" style={{ padding: 0 }}>
-            <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" controls />
+            <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
           </div>
           <div className="col-2" style={{ padding: 0 }}>
-            <RtstpVideo src={cameras[1].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" controls />
+            <RtstpVideo src={cameras[1].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280"  height="720" controls />
           </div>
         </div>
         <div className="row">
