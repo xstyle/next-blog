@@ -142,7 +142,7 @@ class Home extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload);
-    this.webRtcServer.disconnect()
+    debugger
   }
 
   componentDidMount() {
@@ -157,13 +157,10 @@ class Home extends React.Component {
     // this.connect()
   }
 
-  connect(index = 0) {
-    let rtsp_url = this.props.RTSP_STREAM
-    if (index < this.props.robot_game.cameras.length) {
-      rtsp_url = this.props.robot_game.cameras[index].url
-    }
+  mainRtspStream = 0
 
-    this.webRtcServer.connect(rtsp_url, null, 'rtptransport=tcp&timeout=60')
+  connect(index = 0) {
+    this.mainRtspStream = index
   }
 
   buttons = {
@@ -231,7 +228,7 @@ class Home extends React.Component {
         break
       case 'Digit2':
         this.connect(1)
-        break  
+        break
 
       default:
         break
@@ -468,12 +465,19 @@ class Home extends React.Component {
   }
 
   render() {
-
     const { robot_game } = this.props
     if (!robot_game || !this.props.robot) return <div>Кабина управления не доступна. Обратитесь к администратору.</div>
     if (robot_game.state === 'closed') return <div>Игра закончилась. Спасибо что были с нами!</div>
     if (robot_game.state === 'initialized') return <div>Игра скоро начнется. Ждем с нетерпением.</div>
     const timer = this.state.timer.toString().slice(-4)
+    
+    let cameras  = robot_game.cameras
+
+    if (this.mainRtspStream > 0) {
+      cameras = [...cameras, ...cameras.slice(0, this.mainRtspStream)]
+      cameras.splice(0, this.mainRtspStream)
+      console.log(cameras)
+    }
 
     return (<>
       <div className="container-fluid">
@@ -482,25 +486,25 @@ class Home extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <div className="row">
-          <div className="col-6"  style={{padding: 0}}>
-            <RtstpVideo src={robot_game.cameras[0].url}  WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720"/>
+          <div className="col-6" style={{ padding: 0 }}>
+            <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" controls />
           </div>
-          <div className="col-6" style={{padding: 0}}>
-            <RtstpVideo src={robot_game.cameras[1].url}  WEBRTC_SERVER={this.props.WEBRTC_SERVER}  width="1280" height="720"/>
+          <div className="col-6" style={{ padding: 0 }}>
+            <RtstpVideo src={cameras[1].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" controls />
           </div>
         </div>
         <div className="row">
           <div className="col-12 col-lg-8 p-0">
             {/* <video ref={this.myRef} controls autoPlay /> */}
-            <div className="row">
+            {/* <div className="row">
               {
                 this.props.robot_game.cameras.map((camera, index) => {
                   return <div key={index} className="col-2">
-                    <RtstpVideo src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER}/>
+                    <RtstpVideo src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} />
                   </div>
                 })
               }
-            </div>
+            </div> */}
             <div>{timer.slice(0, 1)} {timer.slice(-3)}</div>
             <h1>{this.props.robot.name}</h1>
             <div className="form-check">
