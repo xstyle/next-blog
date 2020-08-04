@@ -496,7 +496,13 @@ class Home extends React.Component {
         <div style={{ height: "100vh", alignItems: "center", display: "flex" }}>
           <div className="row"  >
             <div className="col-9" style={{ padding: 0 }}>
-              <RtstpVideo src={cameras[0].url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
+              <RtstpVideo
+                src={cameras[0].url}
+                audio_src={cameras[0].audio_url}
+                WEBRTC_SERVER={this.props.WEBRTC_SERVER}
+                width="1280"
+                height="720"
+                controls />
             </div>
             <div className="col-3" style={{ padding: 0, alignItems: "top" }}>
               {
