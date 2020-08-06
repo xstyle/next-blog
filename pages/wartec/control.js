@@ -506,9 +506,15 @@ class Home extends React.Component {
             </div>
             <div className="col-3" style={{ padding: 0, alignItems: "top" }}>
               {
-                cameras.slice(1).map((camera, index) => {
-                  return <RtstpVideo key={index} src={camera.url} WEBRTC_SERVER={this.props.WEBRTC_SERVER} width="1280" height="720" controls />
-                })
+                cameras.slice(1).map((camera, index) =>
+                  <RtstpVideo
+                    key={index}
+                    src={camera.url}
+                    WEBRTC_SERVER={this.props.WEBRTC_SERVER}
+                    width="1280"
+                    height="720"
+                    controls />
+                )
               }
             </div>
           </div>

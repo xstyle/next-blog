@@ -10,7 +10,7 @@ export default function RtstpVideo(props) {
             setWebRtcStreamer(webRtcStreamer)
         }
         
-        webRtcStreamer.connect(props.src, props.audio_src || null, `rtptransport=tcp&timeout=60&width=${props.width | 320 }&height=${props.height | 240}`)
+        webRtcStreamer.connect(props.src, props.audio_src || null, `rtptransport=udp&timeout=60&width=${props.width | 320 }&height=${props.height | 240}`)
     }, [props.src, props.WEBRTC_SERVER])
 
     return <>
