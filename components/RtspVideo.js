@@ -14,7 +14,7 @@ export default function RtstpVideo(props) {
     }, [props.src, props.WEBRTC_SERVER])
 
     return <>
-        <video ref={ref} autoPlay controls={props.controls} width="1280" height="720" />
+        <video ref={ref} autoPlay controls={props.controls}/>
         <style jsx>{`
             video {
                 width: 100%;
