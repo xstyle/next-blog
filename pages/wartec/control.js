@@ -499,6 +499,7 @@ class Home extends React.Component {
               <RtstpVideo
                 src={cameras[0].url}
                 audio_src={cameras[0].audio_url}
+                options={cameras[0].options}
                 WEBRTC_SERVER={this.props.WEBRTC_SERVER}
                 // width="1280"
                 // height="720"
@@ -510,6 +511,7 @@ class Home extends React.Component {
                   <RtstpVideo
                     key={index}
                     src={camera.url}
+                    options={camera.options}
                     WEBRTC_SERVER={this.props.WEBRTC_SERVER}
                     // width="1280"
                     // height="720"
