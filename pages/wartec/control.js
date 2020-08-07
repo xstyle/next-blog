@@ -500,8 +500,8 @@ class Home extends React.Component {
                 src={cameras[0].url}
                 audio_src={cameras[0].audio_url}
                 WEBRTC_SERVER={this.props.WEBRTC_SERVER}
-                width="1280"
-                height="720"
+                // width="1280"
+                // height="720"
                 controls />
             </div>
             <div className="col-3" style={{ padding: 0, alignItems: "top" }}>
@@ -511,8 +511,8 @@ class Home extends React.Component {
                     key={index}
                     src={camera.url}
                     WEBRTC_SERVER={this.props.WEBRTC_SERVER}
-                    width="1280"
-                    height="720"
+                    // width="1280"
+                    // height="720"
                     controls />
                 )
               }
