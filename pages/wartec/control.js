@@ -518,6 +518,11 @@ class Home extends React.Component {
                     controls />
                 )
               }
+              <RtstpVideo
+                    options="rtptransport=udp&timeout=60"
+                    audio_src="rtsp://192.168.1.33:554/lives7"
+                    WEBRTC_SERVER={this.props.WEBRTC_SERVER}
+                    controls />
             </div>
           </div>
         </div>
